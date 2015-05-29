@@ -168,9 +168,14 @@ void blas_mm_test(int size) {
     delete[] h_C_naive;
 }
 
-void kukri_mm_test(kukri::half *h_A, kukri::half *h_B, kukri::half *h_C, int M, int N, int K) {
+void kukri_mm_test(kukri::half_mm_func_t func, kukri::half *h_A, kukri::half *h_B, kukri::half *h_C, int M, int N, int K, char *test_name=NULL) {
     printf("\n");
-    printf("---Kukri---\n");
+    if (test_name == NULL) {
+        printf("---Kukri---\n"); 
+    } else {
+        printf("---Kukri [%s]---\n", test_name);
+    }
+        
     printf("M = %d, N = %d, K = %d\n", M, N, K);
     kukri::Timer h2d;
     kukri::Timer mm;
@@ -197,7 +202,7 @@ void kukri_mm_test(kukri::half *h_A, kukri::half *h_B, kukri::half *h_C, int M, 
     mm.tic();
     float alpha = 1;
     float beta = 0;
-    kukri::half_mm_v1(d_A, d_B, d_C, M, N, K);
+    func(d_A, d_B, d_C, M, N, K);
     gpuErrChk(cudaGetLastError());
     mm.toc();
     printf("%f ms\n", mm.get_val());
@@ -215,7 +220,7 @@ void kukri_mm_test(kukri::half *h_A, kukri::half *h_B, kukri::half *h_C, int M, 
     gpuErrChk(cudaFree(d_C));
 }
 
-void kukri_mm_test(int size) {
+void kukri_mm_test(kukri::half_mm_func_t func, int size, char *test_name=NULL) {
 
     float *h_A = new float[size * size];
     float *h_B = new float[size * size];
@@ -241,7 +246,7 @@ void kukri_mm_test(int size) {
 
     naive_mm(h_A, h_B, h_C_naive, size, size, size);
 
-    kukri_mm_test(h_Ah, h_Bh, h_Ch, size, size, size);
+    kukri_mm_test(func, h_Ah, h_Bh, h_Ch, size, size, size, test_name);
 
     kukri::array_half2float_host(h_C, h_Ch, size * size);
 
@@ -358,7 +363,7 @@ int main(int argc, char *argv[]) {
     //kukri_float2half2float_test(n_rows_A, n_cols_A);
     int single_test_size = 1000;
     blas_mm_test(single_test_size);
-    kukri_mm_test(single_test_size);
+    kukri_mm_test(kukri::half_mm_v1, single_test_size, "Naive Half");
 
     //mm_test(n_rows_A, n_cols_A, n_rows_B, n_cols_B);
 

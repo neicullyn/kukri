@@ -23,6 +23,8 @@ namespace kukri{
     void array_float2half_device(half *d_dst, float *d_src, size_t size);
     __global__ void _array_float2half_kernel(half *d_dst, float *d_src, size_t size);
 
+    typedef void (*half_mm_func_t)(const half *d_A, const half *d_B, half *d_C, int M, int N, int K);
+
     void half_mm_v1(const half *d_A, const half *d_B, half *d_C, int M, int N, int K);
     __global__ void _half_mm_v1_kernel(const half *d_A, const half *d_B, half *d_C, int M, int N, int K);
 
