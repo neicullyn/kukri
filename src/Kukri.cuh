@@ -11,6 +11,9 @@
 
 #include "helpers.h"
 
+extern __device__ float __half2float(unsigned short);
+extern __device__ unsigned short __float2half_rn(float);
+extern __device__ void __syncthreads();
 
 namespace kukri{
     typedef unsigned short half;
@@ -25,9 +28,13 @@ namespace kukri{
 
     typedef void (*half_mm_func_t)(const half *d_A, const half *d_B, half *d_C, int M, int N, int K);
 
-    void half_mm_v1(const half *d_A, const half *d_B, half *d_C, int M, int N, int K);
-    __global__ void _half_mm_v1_kernel(const half *d_A, const half *d_B, half *d_C, int M, int N, int K);
+    inline __device__ float _half_mul_2float(half a, half b);
 
+    void half_mm_v01(const half *d_A, const half *d_B, half *d_C, int M, int N, int K);
+    __global__ void _half_mm_v01_kernel(const half *d_A, const half *d_B, half *d_C, int M, int N, int K);
+
+    void half_mm_v02(const half *d_A, const half *d_B, half *d_C, int M, int N, int K);
+    __global__ void _half_mm_v02_kernel(const half *d_A, const half *d_B, half *d_C, int M, int N, int K, int n_iter);
     class Timer {
     public:
         float t;

@@ -6,6 +6,8 @@
 #include <cstdlib>
 #include <cstdio>
 
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
+
 static const char *_cudaGetErrorEnum(cublasStatus_t error)
 {
     switch (error)
@@ -63,5 +65,6 @@ inline void gpuAssert(cublasStatus_t code,
     }
 }
 
+#define IDX2C(i,j,ld) (((j)*(ld))+(i))
 
 #endif
