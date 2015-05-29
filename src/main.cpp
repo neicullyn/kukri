@@ -327,7 +327,7 @@ void mm_test(size_t n_rows_A, size_t n_cols_A, size_t n_rows_B, size_t n_cols_B)
     kukri::array_float2half_host(h_A_kukri_half, h_A_blas, M * K);
     kukri::array_float2half_host(h_B_kukri_half, h_B_blas, K * N);
 
-    // Test cublasSgemm
+    // Run
     blas_mm_test(h_A_blas, h_B_blas, h_C_blas, M, N, K);
 
 
@@ -361,9 +361,10 @@ int main(int argc, char *argv[]) {
 
 
     //kukri_float2half2float_test(n_rows_A, n_cols_A);
-    int single_test_size = 1000;
-    blas_mm_test(single_test_size);
-    kukri_mm_test(kukri::half_mm_v01, single_test_size, "Naive Half");
+    int single_test_size = 4;
+    //blas_mm_test(single_test_size);
+    //kukri_mm_test(kukri::half_mm_v01, single_test_size, "Naive Half");
+    kukri_mm_test(kukri::half_mm_v02, single_test_size, "Shared Memory");
 
     //mm_test(n_rows_A, n_cols_A, n_rows_B, n_cols_B);
 

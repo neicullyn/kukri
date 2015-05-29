@@ -150,6 +150,7 @@ void kukri::half_mm_v02(const half *d_A, const half *d_B, half *d_C, int M, int 
 
     int n_iter = (K + _BOX_V02 - 1) / _BOX_V02;
 
+    printf("%d %d %d | %d %d %d\n", block_size.x, block_size.y, block_size.z, grid_size.x, grid_size.y, grid_size.z);
     kukri::_half_mm_v02_kernel<<<grid_size, block_size>>>(d_A, d_B, d_C, M, N, K, n_iter);
 }
 
@@ -175,10 +176,7 @@ __global__ void kukri::_half_mm_v02_kernel(const half *d_A, const half *d_B, hal
         // Loading the block into shared memory
 
         int k_offset = _BOX_V02 * i_iter;
-
-
-        int k_limit = MIN(K - k_offset, _BOX_V02);
-        
+        int k_limit = MIN(K - k_offset, _BOX_V02);        
 
         if (x < k_limit) {
             for (int y = threadIdx.y; y < m_limit; y += _STRIP_Y_V02) {
@@ -190,7 +188,7 @@ __global__ void kukri::_half_mm_v02_kernel(const half *d_A, const half *d_B, hal
         if (x < n_limit) {
             for (int y = threadIdx.y; y < k_limit; y += _STRIP_Y_V02) {
                 // Note that buf_A and buf_B are transposed
-                buf_B[IDX2C(x, y, _BOX_V02)] = d_B[IDX2C(y + k_offset, x + n_offset, M)];
+                buf_B[IDX2C(x, y, _BOX_V02)] = d_B[IDX2C(y + k_offset, x + n_offset, K)];
             }
         }
 
@@ -203,7 +201,7 @@ __global__ void kukri::_half_mm_v02_kernel(const half *d_A, const half *d_B, hal
                 int y = threadIdx.y + i * _STRIP_Y_V02;
                 if (y < m_limit) {
                     for (int k = 0; k < k_limit; k++) {
-                            half a = buf_A[IDX2C(k, y, _BOX_V02)];
+                        half a = buf_A[IDX2C(k, y, _BOX_V02)];
                         half b = buf_B[IDX2C(x, k, _BOX_V02)];
                         val[i] += kukri::_half_mul_2float(a, b);
                     }   
@@ -216,9 +214,8 @@ __global__ void kukri::_half_mm_v02_kernel(const half *d_A, const half *d_B, hal
         for (int i = 0; i < _N_LINE_Y_V02; i++) {
             int y = threadIdx.y + i * _STRIP_Y_V02;
             if (y < m_limit) {
-                d_C[IDX2C(y, x, M)] = val[i];
+                d_C[IDX2C(y, x, M)] = __float2half_rn(val[i]);
             }
         }
     }
-
 }
