@@ -8,6 +8,39 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
+#include <cublas_v2.h>
+
+static const char *_cudaGetErrorEnum(cublasStatus_t error)
+{
+    switch (error)
+    {
+    case CUBLAS_STATUS_SUCCESS:
+        return "CUBLAS_STATUS_SUCCESS";
+
+    case CUBLAS_STATUS_NOT_INITIALIZED:
+        return "CUBLAS_STATUS_NOT_INITIALIZED";
+
+    case CUBLAS_STATUS_ALLOC_FAILED:
+        return "CUBLAS_STATUS_ALLOC_FAILED";
+
+    case CUBLAS_STATUS_INVALID_VALUE:
+        return "CUBLAS_STATUS_INVALID_VALUE";
+
+    case CUBLAS_STATUS_ARCH_MISMATCH:
+        return "CUBLAS_STATUS_ARCH_MISMATCH";
+
+    case CUBLAS_STATUS_MAPPING_ERROR:
+        return "CUBLAS_STATUS_MAPPING_ERROR";
+
+    case CUBLAS_STATUS_EXECUTION_FAILED:
+        return "CUBLAS_STATUS_EXECUTION_FAILED";
+
+    case CUBLAS_STATUS_INTERNAL_ERROR:
+        return "CUBLAS_STATUS_INTERNAL_ERROR";
+    }
+
+    return "<unknown>";
+}
 
 #define gpuErrChk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
 inline void gpuAssert(cudaError_t code,
@@ -17,6 +50,18 @@ inline void gpuAssert(cudaError_t code,
     if (code != cudaSuccess) {
         fprintf(stderr, "GPUassert: %s %s %d\n",
             cudaGetErrorString(code), file, line);
+        exit(code);
+    }
+}
+
+#define blasErrChk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
+inline void gpuAssert(cublasStatus_t code,
+    const char *file,
+    int line,
+    bool abort = true) {
+    if (code != CUBLAS_STATUS_SUCCESS) {
+        fprintf(stderr, "GPUassert: %s %s %d\n",
+            _cudaGetErrorEnum(code), file, line);
         exit(code);
     }
 }
@@ -34,10 +79,15 @@ namespace kukri{
 
     class Timer {
     public:
+        float t;
         cudaEvent_t m_start;
         cudaEvent_t m_stop;
+
+        Timer() { t = 0; }
+
         void tic();
-        float toc();        
+        float toc();     
+        float get_val() { return t; }
     };
 
     class Recorder {
@@ -49,7 +99,7 @@ namespace kukri{
             max_abs = 0; sum = 0; count = 0;
         }
         void update(double val){
-            double t = abs(val);
+            double t = fabs(val);
             if (t > max_abs) {
                 max_abs = t;
             }

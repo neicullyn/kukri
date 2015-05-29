@@ -9,13 +9,12 @@ void kukri::Timer::tic() {
 }
 
 float kukri::Timer::toc() {
-    float result;
     gpuErrChk(cudaEventRecord(m_stop));
     gpuErrChk(cudaEventSynchronize(m_stop));
-    gpuErrChk(cudaEventElapsedTime(&result, m_start, m_stop));
+    gpuErrChk(cudaEventElapsedTime(&t, m_start, m_stop));
     gpuErrChk(cudaEventDestroy(m_start));
     gpuErrChk(cudaEventDestroy(m_stop));
-    return result;
+    return t;
 }
 
 void kukri::array_half2float_host(float *h_dst, half *h_src, size_t size) {
