@@ -66,66 +66,219 @@ void kukri_float2half2float_test(size_t n_rows, size_t n_cols) {
     delete [] A_half;    
 }
 
-void blas_mm(float *h_A_blas, float *h_B_blas, float *h_C_blas, int m, int n, int k) {
+void naive_mm(float *h_A, float *h_B, float *h_C, int M, int N, int K) {
+    for (int i = 0; i < M; i++) {
+        for (int j = 0; j < N; j++) {
+            h_C[j * M + i] = 0;
+            for (int k = 0; k < K; k++) {
+                h_C[j * M + i] += h_A[k * M + i] * h_B[j * K + k];
+            }
+        }
+    }
+}
+
+void blas_mm_test(float *h_A, float *h_B, float *h_C, int M, int N, int K) {
     printf("\n");
-    printf("-cuBlas-\n");
+    printf("---cuBlas---\n");
+    printf("M = %d, N = %d, K = %d\n", M, N, K);
     kukri::Timer h2d;
     kukri::Timer mm;
     kukri::Timer d2h;
 
     printf("Initiating BLAS...\n");
-    float *d_A_blas;
-    float *d_B_blas;
-    float *d_C_blas;
+    float *d_A;
+    float *d_B;
+    float *d_C;
 
-    gpuErrChk(cudaMalloc(&d_A_blas, m * k * sizeof(float)));
-    gpuErrChk(cudaMalloc(&d_B_blas, k * n * sizeof(float)));
-    gpuErrChk(cudaMalloc(&d_C_blas, m * n * sizeof(float)));
+    gpuErrChk(cudaMalloc(&d_A, M * K * sizeof(float)));
+    gpuErrChk(cudaMalloc(&d_B, K * N * sizeof(float)));
+    gpuErrChk(cudaMalloc(&d_C, M * N * sizeof(float)));
 
     cublasHandle_t handle;
     blasErrChk(cublasCreate(&handle));
 
     printf("h2d...");
     h2d.tic();
-    blasErrChk(cublasSetVector(m * k, sizeof(float), h_A_blas, 1, d_A_blas, 1));
-    blasErrChk(cublasSetVector(k * n, sizeof(float), h_B_blas, 1, d_B_blas, 1));
+    blasErrChk(cublasSetVector(M * K, sizeof(float), h_A, 1, d_A, 1));
+    blasErrChk(cublasSetVector(K * N, sizeof(float), h_B, 1, d_B, 1));
     h2d.toc();
     printf("%f ms\n", h2d.get_val());
 
     printf("mm ...");
     mm.tic();
     float alpha = 1;
-    float beta = 1;
-    blasErrChk(cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, m, n, k, &alpha,
-        d_A_blas, m, d_B_blas, k, &beta, d_C_blas, m));
+    float beta = 0;
+    blasErrChk(cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, M, N, K, &alpha,
+        d_A, M, d_B, K, &beta, d_C, M));
     mm.toc();
     printf("%f ms\n", mm.get_val());
 
     printf("d2h...");
     d2h.tic();
-    blasErrChk(cublasGetVector(m * n, sizeof(float), d_C_blas, 1, h_C_blas, 1));
+    blasErrChk(cublasGetVector(M * N, sizeof(float), d_C, 1, h_C, 1));
     d2h.toc();
     printf("%f ms\n", d2h.get_val());
 
-    printf("overall: %f ms\n", h2d.get_val(), mm.get_val(), d2h.get_val());
+    printf("overall: %f ms\n", h2d.get_val() + mm.get_val() + d2h.get_val());
 
-    gpuErrChk(cudaFree(d_A_blas));
-    gpuErrChk(cudaFree(d_B_blas));
-    gpuErrChk(cudaFree(d_C_blas));
+    gpuErrChk(cudaFree(d_A));
+    gpuErrChk(cudaFree(d_B));
+    gpuErrChk(cudaFree(d_C));
 }
 
-void kukri_mm_test(size_t n_rows_A, size_t n_cols_A, size_t n_rows_B, size_t n_cols_B) {
+void blas_mm_test(int size) {
+    float *h_A = new float[size * size];
+    float *h_B = new float[size * size];
+    float *h_C_naive = new float[size * size];
+    float *h_C = new float[size * size];
+
+    std::default_random_engine gen;
+    std::normal_distribution<float> distribution(0, 1);
+
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            h_A[j * size + i] = distribution(gen);
+            h_B[j * size + i] = distribution(gen);
+        }
+    }
+
+    naive_mm(h_A, h_B, h_C_naive, size, size, size);
+
+    blas_mm_test(h_A, h_B, h_C, size, size, size);
+
+    bool flag = true;
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            float diff = h_C[j * size + i] - h_C_naive[j * size + i];
+            if (abs(diff) > 1e-6) {
+                printf("Test fails: i = %d, j = %d, C[i,j] = %f, C_naive[i,j] = %f\n",
+                        i, j, h_C[j * size + i], h_C_naive[j * size + i]);
+                flag = false;
+            }
+        }
+    }
+
+    if (flag) {
+        printf("[Test Pass]\n");
+    }
+
+    delete[] h_A;
+    delete[] h_B;
+    delete[] h_C;
+    delete[] h_C_naive;
+}
+
+void kukri_mm_test(kukri::half *h_A, kukri::half *h_B, kukri::half *h_C, int M, int N, int K) {
+    printf("\n");
+    printf("---Kukri---\n");
+    printf("M = %d, N = %d, K = %d\n", M, N, K);
+    kukri::Timer h2d;
+    kukri::Timer mm;
+    kukri::Timer d2h;
+
+    printf("Initiating Kukri...\n");
+    kukri::half *d_A;
+    kukri::half *d_B;
+    kukri::half *d_C;
+
+    gpuErrChk(cudaMalloc(&d_A, M * K * sizeof(kukri::half)));
+    gpuErrChk(cudaMalloc(&d_B, K * N * sizeof(kukri::half)));
+    gpuErrChk(cudaMalloc(&d_C, M * N * sizeof(kukri::half)));
+
+
+    printf("h2d...");
+    h2d.tic();
+    gpuErrChk(cudaMemcpy(d_A, h_A, M * K * sizeof(kukri::half), cudaMemcpyHostToDevice));
+    gpuErrChk(cudaMemcpy(d_B, h_B, K * N * sizeof(kukri::half), cudaMemcpyHostToDevice));
+    h2d.toc();
+    printf("%f ms\n", h2d.get_val());
+
+    printf("mm ...");
+    mm.tic();
+    float alpha = 1;
+    float beta = 0;
+    kukri::half_mm_v1(d_A, d_B, d_C, M, N, K);
+    gpuErrChk(cudaGetLastError());
+    mm.toc();
+    printf("%f ms\n", mm.get_val());
+
+    printf("d2h...");
+    d2h.tic();
+    gpuErrChk(cudaMemcpy(h_C, d_C, M * N * sizeof(kukri::half), cudaMemcpyDeviceToHost));
+    d2h.toc();
+    printf("%f ms\n", d2h.get_val());
+
+    printf("overall: %f ms\n", h2d.get_val() + mm.get_val() + d2h.get_val());
+
+    gpuErrChk(cudaFree(d_A));
+    gpuErrChk(cudaFree(d_B));
+    gpuErrChk(cudaFree(d_C));
+}
+
+void kukri_mm_test(int size) {
+
+    float *h_A = new float[size * size];
+    float *h_B = new float[size * size];
+    float *h_C_naive = new float[size * size];
+    float *h_C = new float[size * size];
+
+    kukri::half *h_Ah = new kukri::half[size * size];
+    kukri::half *h_Bh = new kukri::half[size * size];
+    kukri::half *h_Ch = new kukri::half[size * size];
+
+    std::default_random_engine gen;
+    std::normal_distribution<float> distribution(0, 1);
+
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            h_A[j * size + i] = distribution(gen);
+            h_B[j * size + i] = distribution(gen);
+        }
+    }
+
+    kukri::array_float2half_host(h_Ah, h_A, size * size);
+    kukri::array_float2half_host(h_Bh, h_B, size * size);
+
+    naive_mm(h_A, h_B, h_C_naive, size, size, size);
+
+    kukri_mm_test(h_Ah, h_Bh, h_Ch, size, size, size);
+
+    kukri::array_half2float_host(h_C, h_Ch, size * size);
+
+    bool flag = true;
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            float diff = h_C[j * size + i] - h_C_naive[j * size + i];
+            if (abs(diff) > 1e-6) {
+                printf("Test fails: i = %d, j = %d, C[i,j] = %f, C_naive[i,j] = %f\n",
+                    i, j, h_C[j * size + i], h_C_naive[j * size + i]);
+                flag = false;
+            }
+        }
+    }
+
+    if (flag) {
+        printf("[Test Pass]\n");
+    }
+
+    delete[] h_A;
+    delete[] h_B;
+    delete[] h_C;
+    delete[] h_C_naive;
+}
+
+void mm_test(size_t n_rows_A, size_t n_cols_A, size_t n_rows_B, size_t n_cols_B) {
     printf("\n\n");
-    printf("---Matrix Multiplication---\n");
+    printf("===Matrix Multiplication===\n");
 
     if (n_cols_A != n_rows_B) {
         printf("Matrix Dimensions Dismatch\n");
         exit(-1);
     }
 
-    int m = n_rows_A;
-    int n = n_cols_B;
-    int k = n_cols_A;
+    int M = n_rows_A;
+    int N = n_cols_B;
+    int K = n_cols_A;
 
     printf("\n");
     printf("Initiating Matrices...\n");
@@ -150,6 +303,8 @@ void kukri_mm_test(size_t n_rows_A, size_t n_cols_A, size_t n_rows_B, size_t n_c
     h_C_kukri = new float[n_rows_A * n_cols_B];
     h_C_kukri_naive = new float[n_rows_A * n_cols_B];
 
+    kukri::array_float2half_host(h_A_kukri_half, h_A_blas, M * K);
+    kukri::array_float2half_host(h_B_kukri_half, h_B_blas, K * N);
 
     printf("Assigning the values\n");
 
@@ -164,7 +319,11 @@ void kukri_mm_test(size_t n_rows_A, size_t n_cols_A, size_t n_rows_B, size_t n_c
         h_B_blas[i] = distribution(gen);
     }
 
-    blas_mm(h_A_blas, h_B_blas, h_C_blas, m, n, k);
+    kukri::array_float2half_host(h_A_kukri_half, h_A_blas, M * K);
+    kukri::array_float2half_host(h_B_kukri_half, h_B_blas, K * N);
+
+    // Test cublasSgemm
+    blas_mm_test(h_A_blas, h_B_blas, h_C_blas, M, N, K);
 
 
     delete[] h_A_blas;
@@ -196,8 +355,12 @@ int main(int argc, char *argv[]) {
     int n_cols_B = atoi(argv[3]);
 
 
-    kukri_float2half2float_test(n_rows_A, n_cols_A);
-    kukri_mm_test(n_rows_A, n_cols_A, n_rows_B, n_cols_B);
+    //kukri_float2half2float_test(n_rows_A, n_cols_A);
+    int single_test_size = 1000;
+    blas_mm_test(single_test_size);
+    kukri_mm_test(single_test_size);
+
+    //mm_test(n_rows_A, n_cols_A, n_rows_B, n_cols_B);
 
 
 
