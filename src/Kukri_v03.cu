@@ -41,17 +41,15 @@ __global__ void kukri::_half_mm_v03_kernel(const half *d_A, const half *d_B, hal
     int x = threadIdx.x;
 
     float val[_N_LINE_Y_V03];
+    int yf[_N_LINE_Y_V03];
 
-#define SET_VAL_ZERO(i) (val[i] = i)
-    SET_VAL_ZERO(0);
-    SET_VAL_ZERO(1);
-    SET_VAL_ZERO(2);
-    SET_VAL_ZERO(3);
-    SET_VAL_ZERO(4);
-    SET_VAL_ZERO(5);
-    SET_VAL_ZERO(6);
-    SET_VAL_ZERO(7);
-#undef SET_VAL_ZERO(i)
+    for (int i = 0; i < _N_LINE_Y_V03; i++) {
+        val[i] = 0;
+    }
+
+    for (int i = 0; i < _N_LINE_Y_V03; i++) {
+        yf[i] = threadIdx.y + i * _STRIP_Y_V03;
+    }
     
 
     for (int i_iter = 0; i_iter < n_iter; i_iter++) {
@@ -77,16 +75,15 @@ __global__ void kukri::_half_mm_v03_kernel(const half *d_A, const half *d_B, hal
         __syncthreads();
 
         if (x < n_limit) {
-            // Need to change to using register
-            // Not sure where the data is stored now
-            for (int i = 0; i < _N_LINE_Y_V03; i++) {
-                int y = threadIdx.y + i * _STRIP_Y_V03;
-                if (y < m_limit) {
-                    for (int k = 0; k < k_limit; k++) {
-                        float a = buf_A[IDX2C(k, y, _BOX_V03)];
-                        float b = buf_B[IDX2C(x, k, _BOX_V03)];
-                        //val[i] += a * b;
-                    }   
+            for (int k = 0; k < k_limit; k++) {
+                float b = buf_B[IDX2C(x, k, _BOX_V03)];
+
+                for (int i = 0; i < _N_LINE_Y_V03; i++) {
+                    int y = yf[i];
+                    if (y < m_limit) {                    
+                        float a = buf_A[IDX2C(k, y, _BOX_V03)];                        
+                        val[i] += a * b;
+                    }
                 }
             }
         }        
@@ -97,7 +94,7 @@ __global__ void kukri::_half_mm_v03_kernel(const half *d_A, const half *d_B, hal
 
     if (x < n_limit) {
         for (int i = 0; i < _N_LINE_Y_V03; i++) {
-            int y = threadIdx.y + i * _STRIP_Y_V03;
+            int y = yf[i];
             if (y < m_limit) {
                 d_C[IDX2C(y+m_offset, x+n_offset, M)] = __float2half_rn(val[i]);
                 //d_C[IDX2C(y+m_offset, x+n_offset, M)] = __float2half_rn(n_offset);
