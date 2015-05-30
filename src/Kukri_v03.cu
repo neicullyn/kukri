@@ -25,7 +25,7 @@ void kukri::half_mm_v03(const half *d_A, const half *d_B, half *d_C, int M, int 
     int n_iter = (K + _BOX_V03 - 1) / _BOX_V03;
 
     //printf("%d %d %d | %d %d %d\n", block_size.x, block_size.y, block_size.z, grid_size.x, grid_size.y, grid_size.z);
-    kukri::_half_mm_v02_kernel<<<grid_size, block_size>>>(d_A, d_B, d_C, M, N, K, n_iter);
+    kukri::_half_mm_v03_kernel<<<grid_size, block_size>>>(d_A, d_B, d_C, M, N, K, n_iter);
 }
 
 __global__ void kukri::_half_mm_v03_kernel(const half *d_A, const half *d_B, half *d_C, int M, int N, int K, int n_iter) {
