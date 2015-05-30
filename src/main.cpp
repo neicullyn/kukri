@@ -230,21 +230,30 @@ void kukri_mm_test(kukri::half_mm_func_t func, int size, char *test_name=NULL) {
     kukri::half *h_Ah = new kukri::half[size * size];
     kukri::half *h_Bh = new kukri::half[size * size];
     kukri::half *h_Ch = new kukri::half[size * size];
+    kukri::half *h_Ch_naive = new kukri::half[size * size];
 
     std::default_random_engine gen;
-    std::normal_distribution<float> distribution(0, 1);
+    std::uniform_real_distribution<float> distribution(1, 3);
 
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
             h_A[j * size + i] = distribution(gen);
             h_B[j * size + i] = distribution(gen);
+            //h_A[j * size + i] = j;
+            //h_B[j * size + i] = i;
         }
     }
 
     kukri::array_float2half_host(h_Ah, h_A, size * size);
     kukri::array_float2half_host(h_Bh, h_B, size * size);
 
+    kukri::array_half2float_host(h_A, h_Ah, size * size);
+    kukri::array_half2float_host(h_B, h_Bh, size * size);
+
     naive_mm(h_A, h_B, h_C_naive, size, size, size);
+
+    kukri::array_float2half_host(h_Ch_naive, h_C_naive, size * size);
+    kukri::array_half2float_host(h_C_naive, h_Ch_naive, size * size);
 
     kukri_mm_test(func, h_Ah, h_Bh, h_Ch, size, size, size, test_name);
 
@@ -270,6 +279,11 @@ void kukri_mm_test(kukri::half_mm_func_t func, int size, char *test_name=NULL) {
     delete[] h_B;
     delete[] h_C;
     delete[] h_C_naive;
+
+    delete[] h_Ah;
+    delete[] h_Bh;
+    delete[] h_Ch;
+    delete[] h_Ch_naive;
 }
 
 void mm_test(size_t n_rows_A, size_t n_cols_A, size_t n_rows_B, size_t n_cols_B) {
@@ -361,7 +375,8 @@ int main(int argc, char *argv[]) {
 
 
     //kukri_float2half2float_test(n_rows_A, n_cols_A);
-    //blas_mm_test(single_test_size);
+    int single_test_size = 65;
+    blas_mm_test(single_test_size);
     //kukri_mm_test(kukri::half_mm_v01, single_test_size, "Naive Half");
     kukri_mm_test(kukri::half_mm_v02, single_test_size, "Shared Memory");
 
