@@ -34,18 +34,22 @@ else
       NVCCFLAGS := -m64
 endif
 
+OBJDIR = obj
+
 TARGETS = kukri_test
+OBJS = Kukri_utility.o Kukri_v01.o Kukri_v02.o Kukri_v03.o
 
 all: $(TARGETS)
 
-kukri_test: main.cpp kukri.o
-	$(CC) $< -std=c++0x -o $@ kukri.o -O3 $(LDFLAGS) -Wall -I$(CUDA_INC_PATH)
+$(TARGETS): main.cpp  $(addprefix $(OBJDIR)/,$(OBJS))
+	$(CC) $< $(addprefix $(OBJDIR)/,$(OBJS)) -std=c++0x -o $@ -O3 $(LDFLAGS) -Wall -I$(CUDA_INC_PATH)
 
-kukri.o: Kukri.cu
+$(OBJDIR)/%.o: %.cu
+	mkdir -p $(OBJDIR)
 	$(NVCC) $(NVCCFLAGS) -O3 $(EXTRA_NVCCFLAGS) $(GENCODE_FLAGS) -I$(CUDA_INC_PATH) -o $@ -c $<
 
 
 clean:
-	rm -f *.o $(TARGETS)
+	rm -f $(OBJDIR)/*.o $(TARGETS)
 
 again: clean $(TARGETS)
