@@ -263,7 +263,7 @@ void kukri_mm_test(kukri::half_mm_func_t func, int size, char *test_name=NULL) {
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
             float diff = h_C[j * size + i] - h_C_naive[j * size + i];
-            if (abs(diff) > 1e-6) {
+            if (abs(diff) > 0.05 * h_C[j * size + i]) {
                 printf("Test fails: i = %d, j = %d, C[i,j] = %f, C_naive[i,j] = %f\n",
                     i, j, h_C[j * size + i], h_C_naive[j * size + i]);
                 flag = false;
@@ -375,7 +375,7 @@ int main(int argc, char *argv[]) {
 
 
     //kukri_float2half2float_test(n_rows_A, n_cols_A);
-    int single_test_size = 65;
+    int single_test_size = 512;
     blas_mm_test(single_test_size);
     //kukri_mm_test(kukri::half_mm_v01, single_test_size, "Naive Half");
     kukri_mm_test(kukri::half_mm_v02, single_test_size, "Shared Memory");

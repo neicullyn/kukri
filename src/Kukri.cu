@@ -150,7 +150,7 @@ void kukri::half_mm_v02(const half *d_A, const half *d_B, half *d_C, int M, int 
 
     int n_iter = (K + _BOX_V02 - 1) / _BOX_V02;
 
-    printf("%d %d %d | %d %d %d\n", block_size.x, block_size.y, block_size.z, grid_size.x, grid_size.y, grid_size.z);
+    //printf("%d %d %d | %d %d %d\n", block_size.x, block_size.y, block_size.z, grid_size.x, grid_size.y, grid_size.z);
     kukri::_half_mm_v02_kernel<<<grid_size, block_size>>>(d_A, d_B, d_C, M, N, K, n_iter);
 }
 
@@ -215,8 +215,8 @@ __global__ void kukri::_half_mm_v02_kernel(const half *d_A, const half *d_B, hal
         for (int i = 0; i < _N_LINE_Y_V02; i++) {
             int y = threadIdx.y + i * _STRIP_Y_V02;
             if (y < m_limit) {
-                //d_C[IDX2C(y+m_offset, x+n_offset, M)] = __float2half_rn(val[i]);
-                d_C[IDX2C(y+m_offset, x+n_offset, M)] = __float2half_rn(n_offset);
+                d_C[IDX2C(y+m_offset, x+n_offset, M)] = __float2half_rn(val[i]);
+                //d_C[IDX2C(y+m_offset, x+n_offset, M)] = __float2half_rn(n_offset);
             }
         }
     }
