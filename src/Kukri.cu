@@ -209,13 +209,14 @@ __global__ void kukri::_half_mm_v02_kernel(const half *d_A, const half *d_B, hal
             }
         }        
     }
+    __syncthreads();
 
     if (x < n_limit) {
         for (int i = 0; i < _N_LINE_Y_V02; i++) {
             int y = threadIdx.y + i * _STRIP_Y_V02;
             if (y < m_limit) {
-                d_C[IDX2C(y+m_offset, x+n_offset, M)] = __float2half_rn(val[i]);
-                //d_C[IDX2C(y+m_offset, x+n_offset, M)] = __float2half_rn(1);
+                //d_C[IDX2C(y+m_offset, x+n_offset, M)] = __float2half_rn(val[i]);
+                d_C[IDX2C(y+m_offset, x+n_offset, M)] = __float2half_rn(n_offset);
             }
         }
     }
