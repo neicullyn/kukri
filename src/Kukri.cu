@@ -155,8 +155,8 @@ void kukri::half_mm_v02(const half *d_A, const half *d_B, half *d_C, int M, int 
 }
 
 __global__ void kukri::_half_mm_v02_kernel(const half *d_A, const half *d_B, half *d_C, int M, int N, int K, int n_iter) {
-    __shared__ half buf_A[_BOX_V02 * _BOX_V02];
-    __shared__ half buf_B[_BOX_V02 * _BOX_V02];
+    __shared__ float buf_A[_BOX_V02 * _BOX_V02];
+    __shared__ float buf_B[_BOX_V02 * _BOX_V02];
 
     int m_offset = _BOX_V02 * blockIdx.x;
     int n_offset = _BOX_V02 * blockIdx.y;
@@ -181,14 +181,14 @@ __global__ void kukri::_half_mm_v02_kernel(const half *d_A, const half *d_B, hal
         if (x < k_limit) {
             for (int y = threadIdx.y; y < m_limit; y += _STRIP_Y_V02) {
                 // Note that buf_A and buf_B are transposed
-                buf_A[IDX2C(x, y, _BOX_V02)] = d_A[IDX2C(y + m_offset, x + k_offset, M)];
+                buf_A[IDX2C(x, y, _BOX_V02)] = __half2float(d_A[IDX2C(y + m_offset, x + k_offset, M)]);
             }
         }
 
         if (x < n_limit) {
             for (int y = threadIdx.y; y < k_limit; y += _STRIP_Y_V02) {
                 // Note that buf_A and buf_B are transposed
-                buf_B[IDX2C(x, y, _BOX_V02)] = d_B[IDX2C(y + k_offset, x + n_offset, K)];
+                buf_B[IDX2C(x, y, _BOX_V02)] = __half2float(d_B[IDX2C(y + k_offset, x + n_offset, K)]);
             }
         }
 
@@ -201,9 +201,9 @@ __global__ void kukri::_half_mm_v02_kernel(const half *d_A, const half *d_B, hal
                 int y = threadIdx.y + i * _STRIP_Y_V02;
                 if (y < m_limit) {
                     for (int k = 0; k < k_limit; k++) {
-                        half a = buf_A[IDX2C(k, y, _BOX_V02)];
-                        half b = buf_B[IDX2C(x, k, _BOX_V02)];
-                        val[i] += kukri::_half_mul_2float(a, b);
+                        float a = buf_A[IDX2C(k, y, _BOX_V02)];
+                        float b = buf_B[IDX2C(x, k, _BOX_V02)];
+                        val[i] += a * b;
                     }   
                 }
             }
