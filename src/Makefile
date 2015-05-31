@@ -37,7 +37,7 @@ endif
 OBJDIR = obj
 
 TARGETS = kukri_test
-OBJS = Kukri_utility.o Kukri_v01.o Kukri_v02.o Kukri_v03.o
+OBJS = Kukri_utility.o Kukri_v01.o Kukri_v02.o Kukri_v03.o Kukri_v04.o
 
 all: $(TARGETS)
 

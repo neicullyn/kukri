@@ -266,7 +266,7 @@ void kukri_mm_test(kukri::half_mm_func_t func, int size, char *test_name = NULL,
         for (int j = 0; j < size; j++) {
             float diff = h_C[j * size + i] - h_C_naive[j * size + i];
             rcd_rerr.update(diff / h_C_naive[j * size + i]);
-            if (en_test && (fabs(diff) > 0.02 * fabs(h_C_naive[j * size + i]))) {
+            if (en_test && (fabs(diff) > 0.001 * fabs(h_C_naive[j * size + i]))) {
                 printf("Test fails: i = %d, j = %d, C[i,j] = %f, C_naive[i,j] = %f\n",
                     i, j, h_C[j * size + i], h_C_naive[j * size + i]);
                 flag = false;
@@ -332,7 +332,7 @@ void mm_test(size_t n_rows_A, size_t n_cols_A, size_t n_rows_B, size_t n_cols_B)
     printf("Assigning the values\n");
 
     std::default_random_engine gen;
-    std::normal_distribution<float> distribution(0, 1);
+    std::normal_distribution<float> distribution(0, 3);
 
     for (size_t i = 0; i < n_rows_A * n_cols_A; i++) {
         h_A_blas[i] = distribution(gen);
@@ -379,7 +379,7 @@ int main(int argc, char *argv[]) {
 
 
     //kukri_float2half2float_test(n_rows_A, n_cols_A);
-    int single_test_size = 1024;
+    int single_test_size = 64;
 
     kukri::Timer tmr;
 
@@ -387,8 +387,9 @@ int main(int argc, char *argv[]) {
 
     blas_mm_test(single_test_size);
     //kukri_mm_test(kukri::half_mm_v01, single_test_size, "Naive Half");
-    kukri_mm_test(kukri::half_mm_v02, single_test_size, "Shared Memory", test);
+    //kukri_mm_test(kukri::half_mm_v02, single_test_size, "Shared Memory", test);
     kukri_mm_test(kukri::half_mm_v03, single_test_size, "Improved Shared Memory", test);
+    kukri_mm_test(kukri::half_mm_v04, single_test_size, "Random Try", test);
 
     //mm_test(n_rows_A, n_cols_A, n_rows_B, n_cols_B);
 
