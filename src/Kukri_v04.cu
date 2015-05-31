@@ -42,7 +42,7 @@ __global__ void kukri::_half_mm_v04_kernel(const half *d_A, const half *d_B, hal
 
     float val[_N_LINE_Y_V04];
     int yf[_N_LINE_Y_V04];
-    int yo0, yo1, yo2, yo3, yo4, yo5, yo6, yo7;
+    int yo[_N_LINE_Y_V04];
 
     for (int i = 0; i < _N_LINE_Y_V04; i++) {
         val[i] = 0;
@@ -52,18 +52,9 @@ __global__ void kukri::_half_mm_v04_kernel(const half *d_A, const half *d_B, hal
         yf[i] = threadIdx.y + i * _STRID_Y_V04;
     }
 
-    //for (int i = 0; i < _N_LINE_Y_V04; i++) {
-    //    yo[i] = yf[i] * (_BOX_V04 + 1);
-    //}
-
-    yo0 = yf[0] * (_BOX_V04 + 1);
-    yo1 = yf[1] * (_BOX_V04 + 1);
-    yo2 = yf[2] * (_BOX_V04 + 1);
-    yo3 = yf[3] * (_BOX_V04 + 1);
-    yo4 = yf[4] * (_BOX_V04 + 1);
-    yo5 = yf[5] * (_BOX_V04 + 1);
-    yo6 = yf[6] * (_BOX_V04 + 1);
-    yo7 = yf[7] * (_BOX_V04 + 1);
+    for (int i = 0; i < _N_LINE_Y_V04; i++) {
+        yo[i] = threadIdx.y * _BOX_V04 + i * _STRID_Y_V04 * _BOX_V04;
+    }
 
     for (int i_iter = 0; i_iter < n_iter; i_iter++) {
         // Loading the block into shared memory
@@ -91,89 +82,16 @@ __global__ void kukri::_half_mm_v04_kernel(const half *d_A, const half *d_B, hal
             for (int k = 0; k < k_limit; k++) {
                 float a = buf_A[IDX2C(x, k, _BOX_V04 + 1)];               
 
-                //for (int i = 0; i < _N_LINE_Y_V04; i++) {
-                //    int y = yf[i];                    
+                for (int i = 0; i < _N_LINE_Y_V04; i++) {
+                    int y = yf[i];                    
 
-                //    if (y < n_limit) {                    
-                //        //float b = buf_B[IDX2C(k, y, _BOX_V04 + 1)];
-                //        //   = buf_A[y * _BOX_V04 + k]
-                //        //   = buf_A[yo[i] + k]
-                //        float b = buf_B[yo[i] + k];
-                //        val[i] += a * b;
-                //    }
-                //}
-                int y;
-
-                y = yf[0];
-                if (y < n_limit) {
-                    //float b = buf_B[IDX2C(k, y, _BOX_V04 + 1)];
-                    //   = buf_A[y * _BOX_V04 + k]
-                    //   = buf_A[yo[i] + k]
-                    float b = buf_B[yo0 + k];
-                    val[0] += a * b;
-                }
-
-                y = yf[1];
-                if (y < n_limit) {
-                    //float b = buf_B[IDX2C(k, y, _BOX_V04 + 1)];
-                    //   = buf_A[y * _BOX_V04 + k]
-                    //   = buf_A[yo[i] + k]
-                    float b = buf_B[yo1 + k];
-                    val[1] += a * b;
-                }
-
-                y = yf[2];
-                if (y < n_limit) {
-                    //float b = buf_B[IDX2C(k, y, _BOX_V04 + 1)];
-                    //   = buf_A[y * _BOX_V04 + k]
-                    //   = buf_A[yo[i] + k]
-                    float b = buf_B[yo2 + k];
-                    val[2] += a * b;
-                }
-
-                y = yf[3];
-                if (y < n_limit) {
-                    //float b = buf_B[IDX2C(k, y, _BOX_V04 + 1)];
-                    //   = buf_A[y * _BOX_V04 + k]
-                    //   = buf_A[yo[i] + k]
-                    float b = buf_B[yo3 + k];
-                    val[3] += a * b;
-                }
-
-                y = yf[4];
-                if (y < n_limit) {
-                    //float b = buf_B[IDX2C(k, y, _BOX_V04 + 1)];
-                    //   = buf_A[y * _BOX_V04 + k]
-                    //   = buf_A[yo[i] + k]
-                    float b = buf_B[yo4 + k];
-                    val[4] += a * b;
-                }
-
-                y = yf[5];
-                if (y < n_limit) {
-                    //float b = buf_B[IDX2C(k, y, _BOX_V04 + 1)];
-                    //   = buf_A[y * _BOX_V04 + k]
-                    //   = buf_A[yo[i] + k]
-                    float b = buf_B[yo5 + k];
-                    val[5] += a * b;
-                }
-
-                y = yf[6];
-                if (y < n_limit) {
-                    //float b = buf_B[IDX2C(k, y, _BOX_V04 + 1)];
-                    //   = buf_A[y * _BOX_V04 + k]
-                    //   = buf_A[yo[i] + k]
-                    float b = buf_B[yo6 + k];
-                    val[6] += a * b;
-                }
-
-                y = yf[7];
-                if (y < n_limit) {
-                    //float b = buf_B[IDX2C(k, y, _BOX_V04 + 1)];
-                    //   = buf_A[y * _BOX_V04 + k]
-                    //   = buf_A[yo[i] + k]
-                    float b = buf_B[yo7 + k];
-                    val[7] += a * b;
+                    if (y < n_limit) {                    
+                        float b = buf_B[IDX2C(k, y, _BOX_V04 + 1)];
+                        //   = buf_A[y * _BOX_V04 + k]
+                        //   = buf_A[yo[i] + k]
+                        //float a = buf_A[yo[i] + k];
+                        val[i] += a * b;
+                    }
                 }
             }
         }        
