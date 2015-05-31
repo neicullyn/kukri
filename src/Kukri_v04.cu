@@ -1,7 +1,7 @@
 #include "Kukri.cuh"
 
 using namespace kukri;
-#define _BOX_V04 64
+#define _BOX_V04 32
 #define _BLOCK_SIZE_X_V04 32
 #define _BLOCK_SIZE_Y_V04 16
 #define _STRID_Y_V04 _BLOCK_SIZE_Y_V04
