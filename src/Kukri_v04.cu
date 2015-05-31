@@ -4,7 +4,7 @@ using namespace kukri;
 #define _BOX_V04 64
 #define _BLOCK_SIZE_X_V04 64
 #define _BLOCK_SIZE_Y_V04 8
-#define _STRIP_Y_V04 _BLOCK_SIZE_Y_V04
+#define _STRID_Y_V04 _BLOCK_SIZE_Y_V04
 #define _N_LINE_Y_V04 (_BOX_V04 / _BLOCK_SIZE_Y_V04)
 
 void kukri::half_mm_v04(const half *d_A, const half *d_B, half *d_C, int M, int N, int K) {
@@ -49,11 +49,11 @@ __global__ void kukri::_half_mm_v04_kernel(const half *d_A, const half *d_B, hal
     }
 
     for (int i = 0; i < _N_LINE_Y_V04; i++) {
-        yf[i] = threadIdx.y + i * _STRIP_Y_V04;
+        yf[i] = threadIdx.y + i * _STRID_Y_V04;
     }
 
     for (int i = 0; i < _N_LINE_Y_V04; i++) {
-        yo[i] = threadIdx.y * _BOX_V04 + i * _STRIP_Y_V04 * _BOX_V04;
+        yo[i] = threadIdx.y * _BOX_V04 + i * _STRID_Y_V04 * _BOX_V04;
     }
 
     for (int i_iter = 0; i_iter < n_iter; i_iter++) {
@@ -63,14 +63,14 @@ __global__ void kukri::_half_mm_v04_kernel(const half *d_A, const half *d_B, hal
         int k_limit = MIN(K - k_offset, _BOX_V04);        
 
         if (x < m_limit) {
-            for (int y = threadIdx.y; y < k_limit; y += _STRIP_Y_V04) {
+            for (int y = threadIdx.y; y < k_limit; y += _STRID_Y_V04) {
                 buf_A[IDX2C(x, y, _BOX_V04 + 1)] = __half2float(d_A[IDX2C(x + m_offset, y + k_offset, M)]);
                 //buf_A[IDX2C(x, y, _BOX_V04)] = __half2float(1);
             }
         }
 
         if (x < k_limit) {
-            for (int y = threadIdx.y; y < n_limit; y += _STRIP_Y_V04) {
+            for (int y = threadIdx.y; y < n_limit; y += _STRID_Y_V04) {
                 buf_B[IDX2C(x, y, _BOX_V04 + 1)] = __half2float(d_B[IDX2C(x + k_offset, y + n_offset, K)]);
                 //buf_B[IDX2C(x, y, _BOX_V04)] = __half2float(1);
             }
@@ -98,15 +98,13 @@ __global__ void kukri::_half_mm_v04_kernel(const half *d_A, const half *d_B, hal
     }
     //__syncthreads();
 
-    //Test code
-
     if (x < m_limit) {
         for (int i = 0; i < _N_LINE_Y_V04; i++) {
             int y = yf[i];
             if (y < n_limit) {
                 d_C[IDX2C(x+m_offset, y+n_offset, M)] = __float2half_rn(val[i]);
-                //d_C[IDX2C(y+m_offset, x+n_offset, M)] = __float2half_rn(n_offset);
             }
         }
     }
+
 }

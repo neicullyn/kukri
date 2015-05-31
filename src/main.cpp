@@ -379,11 +379,11 @@ int main(int argc, char *argv[]) {
 
 
     //kukri_float2half2float_test(n_rows_A, n_cols_A);
-    int single_test_size = 64;
+    int single_test_size = 512;
 
     kukri::Timer tmr;
 
-    bool test = true;
+    bool test = false;
 
     blas_mm_test(single_test_size);
     //kukri_mm_test(kukri::half_mm_v01, single_test_size, "Naive Half");

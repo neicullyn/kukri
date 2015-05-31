@@ -4,7 +4,7 @@ using namespace kukri;
 #define _BOX_V02 64
 #define _BLOCK_SIZE_X_V02 64
 #define _BLOCK_SIZE_Y_V02 8
-#define _STRIP_Y_V02 _BLOCK_SIZE_Y_V02
+#define _STRID_Y_V02 _BLOCK_SIZE_Y_V02
 #define _N_LINE_Y_V02 (_BOX_V02 / _BLOCK_SIZE_Y_V02)
 
 void kukri::half_mm_v02(const half *d_A, const half *d_B, half *d_C, int M, int N, int K) {
@@ -53,14 +53,14 @@ __global__ void kukri::_half_mm_v02_kernel(const half *d_A, const half *d_B, hal
         int k_limit = MIN(K - k_offset, _BOX_V02);        
 
         if (x < k_limit) {
-            for (int y = threadIdx.y; y < m_limit; y += _STRIP_Y_V02) {
+            for (int y = threadIdx.y; y < m_limit; y += _STRID_Y_V02) {
                 // Note that buf_A and buf_B are transposed
                 buf_A[IDX2C(x, y, _BOX_V02)] = __half2float(d_A[IDX2C(y + m_offset, x + k_offset, M)]);
             }
         }
 
         if (x < n_limit) {
-            for (int y = threadIdx.y; y < k_limit; y += _STRIP_Y_V02) {
+            for (int y = threadIdx.y; y < k_limit; y += _STRID_Y_V02) {
                 // Note that buf_A and buf_B are transposed
                 buf_B[IDX2C(x, y, _BOX_V02)] = __half2float(d_B[IDX2C(y + k_offset, x + n_offset, K)]);
             }
@@ -72,7 +72,7 @@ __global__ void kukri::_half_mm_v02_kernel(const half *d_A, const half *d_B, hal
             // Need to change to using register
             // Not sure where the data is stored now
             for (int i = 0; i < _N_LINE_Y_V02; i++) {
-                int y = threadIdx.y + i * _STRIP_Y_V02;
+                int y = threadIdx.y + i * _STRID_Y_V02;
                 if (y < m_limit) {
                     for (int k = 0; k < k_limit; k++) {
                         float a = buf_A[IDX2C(k, y, _BOX_V02)];
@@ -87,7 +87,7 @@ __global__ void kukri::_half_mm_v02_kernel(const half *d_A, const half *d_B, hal
 
     if (x < n_limit) {
         for (int i = 0; i < _N_LINE_Y_V02; i++) {
-            int y = threadIdx.y + i * _STRIP_Y_V02;
+            int y = threadIdx.y + i * _STRID_Y_V02;
             if (y < m_limit) {
                 d_C[IDX2C(y+m_offset, x+n_offset, M)] = __float2half_rn(val[i]);
                 //d_C[IDX2C(y+m_offset, x+n_offset, M)] = __float2half_rn(n_offset);
