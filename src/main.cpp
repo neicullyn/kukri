@@ -365,16 +365,16 @@ int main(int argc, char *argv[]) {
 
 
     //kukri_float2half2float_test(n_rows_A, n_cols_A);
-    int single_test_size = 256;
+    int single_test_size = 1000;
 
     kukri::Timer tmr;
 
     bool test = true;
 
     blas_mm_test(single_test_size);
-    //kukri_mm_test(kukri::half_mm_v01, single_test_size, "Naive Half");
-    //kukri_mm_test(kukri::half_mm_v02, single_test_size, "Shared Memory", test);
-    //kukri_mm_test(kukri::half_mm_v03, single_test_size, "Improved Shared Memory", test);
+    kukri_mm_test(kukri::half_mm_v01, single_test_size, "Naive Half", test);
+    kukri_mm_test(kukri::half_mm_v02, single_test_size, "Shared Memory", test);
+    kukri_mm_test(kukri::half_mm_v03, single_test_size, "Improved Shared Memory", test);
     kukri_mm_test(kukri::half_mm_v04, single_test_size, "Coalasced", test);
 
     //mm_test(n_rows_A, n_cols_A, n_rows_B, n_cols_B);

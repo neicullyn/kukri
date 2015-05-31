@@ -5,7 +5,7 @@ using namespace kukri;
 #define _BLOCK_SIZE_X_V02 64
 #define _BLOCK_SIZE_Y_V02 8
 #define _STRID_Y_V02 _BLOCK_SIZE_Y_V02
-#define _N_LINE_Y_V02 (_BOX_V02 / _BLOCK_SIZE_Y_V02)
+#define _N_LINE_Y_V02 ((_BOX_V02 + _BLOCK_SIZE_Y_V02 - 1) / _BLOCK_SIZE_Y_V02)
 
 void kukri::half_mm_v02(const half *d_A, const half *d_B, half *d_C, int M, int N, int K) {
     dim3 grid_size;
@@ -82,8 +82,10 @@ __global__ void kukri::_half_mm_v02_kernel(const half *d_A, const half *d_B, hal
                 }
             }
         }        
+
+        __syncthreads();
     }
-    __syncthreads();
+    
 
     if (x < n_limit) {
         for (int i = 0; i < _N_LINE_Y_V02; i++) {
