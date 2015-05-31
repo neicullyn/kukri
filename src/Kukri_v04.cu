@@ -42,9 +42,7 @@ __global__ void kukri::_half_mm_v04_kernel(const half *d_A, const half *d_B, hal
 
     float val[_N_LINE_Y_V04];
     int yf[_N_LINE_Y_V04];
-    float * buf_B_yo[_N_LINE_Y_V04];
-
-    float a, b;
+    int yo[_N_LINE_Y_V04];
 
     for (int i = 0; i < _N_LINE_Y_V04; i++) {
         val[i] = 0;
@@ -55,7 +53,7 @@ __global__ void kukri::_half_mm_v04_kernel(const half *d_A, const half *d_B, hal
     }
 
     for (int i = 0; i < _N_LINE_Y_V04; i++) {
-        buf_B_yo[i] = buf_B + yf[i] * (_BOX_V04 + 1);
+        yo[i] = threadIdx.y * _BOX_V04 + i * _STRID_Y_V04 * _BOX_V04;
     }
 
     for (int i_iter = 0; i_iter < n_iter; i_iter++) {
@@ -67,27 +65,31 @@ __global__ void kukri::_half_mm_v04_kernel(const half *d_A, const half *d_B, hal
         if (x < m_limit) {
             for (int y = threadIdx.y; y < k_limit; y += _STRID_Y_V04) {
                 buf_A[IDX2C(x, y, _BOX_V04 + 1)] = __half2float(d_A[IDX2C(x + m_offset, y + k_offset, M)]);
+                //buf_A[IDX2C(x, y, _BOX_V04)] = __half2float(1);
             }
         }
 
         if (x < k_limit) {
             for (int y = threadIdx.y; y < n_limit; y += _STRID_Y_V04) {
                 buf_B[IDX2C(x, y, _BOX_V04 + 1)] = __half2float(d_B[IDX2C(x + k_offset, y + n_offset, K)]);
+                //buf_B[IDX2C(x, y, _BOX_V04)] = __half2float(1);
             }
         }
 
         __syncthreads();
 
         if (x < m_limit) {
-            for (int k = 0; k < k_limit; k++) {         
+            for (int k = 0; k < k_limit; k++) {
+                float a = buf_A[IDX2C(x, k, _BOX_V04 + 1)];               
+
                 for (int i = 0; i < _N_LINE_Y_V04; i++) {
                     int y = yf[i];                    
 
                     if (y < n_limit) {                    
-                        // float b = buf_B[IDX2C(k, y, _BOX_V04 + 1)];
-                        a = buf_A[IDX2C(x, k, _BOX_V04 + 1)];
-                        b = *(buf_B_yo[i] + k);
-                        
+                        float b = buf_B[IDX2C(k, y, _BOX_V04 + 1)];
+                        //   = buf_A[y * _BOX_V04 + k]
+                        //   = buf_A[yo[i] + k]
+                        //float a = buf_A[yo[i] + k];
                         val[i] += a * b;
                     }
                 }
