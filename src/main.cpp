@@ -1,10 +1,23 @@
 #include <cstdio>
 #include <cstdlib>
-#include <random>
 #include <cstring>
 #include <cublas_v2.h>
+#include <curand.h>
 #include "Kukri.cuh"
 
+void generate_normal(float *buf, int size, float mean, float stddev) {
+    curandGenerator_t gen;
+    curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT);
+
+    float * d_A;
+    cudaMalloc(&d_A, size * sizeof(float));
+    curandGenerateNormal(gen, d_A, size, mean, stddev);
+
+    cudaMemcpy(buf, d_A, size * sizeof(float), cudaMemcpyDeviceToHost);
+
+    cudaFree(d_A);
+    curandDestroyGenerator(gen);
+}
 
 void kukri_float2half2float_test(size_t n_rows, size_t n_cols) {
     float *A_input, *A_back;
@@ -19,13 +32,7 @@ void kukri_float2half2float_test(size_t n_rows, size_t n_cols) {
 
     printf("Generating input matrix : %ldx%ld\n", n_rows, n_cols);
 
-    std::default_random_engine gen;
-    std::uniform_real_distribution<float> distribution(0.5, 1.5);
-
-    for (size_t i = 0; i < n_rows * n_cols; i++) {
-        A_input[i] = distribution(gen);
-    }
-
+    generate_normal(A_input, n_rows * n_cols, 0, 1);
 
     kukri::Timer tmr;
     float tmr_result;
@@ -132,15 +139,8 @@ void blas_mm_test(int size) {
     float *h_C_naive = new float[size * size];
     float *h_C = new float[size * size];
 
-    std::default_random_engine gen;
-    std::normal_distribution<float> distribution(0, 1);
-
-    for (int i = 0; i < size; i++) {
-        for (int j = 0; j < size; j++) {
-            h_A[j * size + i] = distribution(gen);
-            h_B[j * size + i] = distribution(gen);
-        }
-    }
+    generate_normal(h_A, size * size, 0, 1);
+    generate_normal(h_B, size * size, 0, 1);
 
     naive_mm(h_A, h_B, h_C_naive, size, size, size);
 
@@ -232,17 +232,8 @@ void kukri_mm_test(kukri::half_mm_func_t func, int size, char *test_name = NULL,
     kukri::half *h_Ch = new kukri::half[size * size];
     kukri::half *h_Ch_naive = new kukri::half[size * size];
 
-    std::default_random_engine gen;
-    std::uniform_real_distribution<float> distribution(1, 3);
-
-    for (int i = 0; i < size; i++) {
-        for (int j = 0; j < size; j++) {
-            h_A[j * size + i] = distribution(gen);
-            h_B[j * size + i] = distribution(gen);
-            //h_A[j * size + i] = j;
-            //h_B[j * size + i] = i;
-        }
-    }
+    generate_normal(h_A, size * size, 0, 1);
+    generate_normal(h_B, size * size, 0, 1);
 
     kukri::array_float2half_host(h_Ah, h_A, size * size);
     kukri::array_float2half_host(h_Bh, h_B, size * size);
@@ -331,16 +322,8 @@ void mm_test(size_t n_rows_A, size_t n_cols_A, size_t n_rows_B, size_t n_cols_B)
 
     printf("Assigning the values\n");
 
-    std::default_random_engine gen;
-    std::normal_distribution<float> distribution(0, 3);
-
-    for (size_t i = 0; i < n_rows_A * n_cols_A; i++) {
-        h_A_blas[i] = distribution(gen);
-    }
-
-    for (size_t i = 0; i < n_rows_B * n_cols_B; i++) {
-        h_B_blas[i] = distribution(gen);
-    }
+    generate_normal(h_A_blas, n_rows_A * n_cols_A, 0, 1);
+    generate_normal(h_B_blas, n_rows_B * n_cols_A, 0, 1);
 
     kukri::array_float2half_host(h_A_kukri_half, h_A_blas, M * K);
     kukri::array_float2half_host(h_B_kukri_half, h_B_blas, K * N);
@@ -379,7 +362,7 @@ int main(int argc, char *argv[]) {
 
 
     //kukri_float2half2float_test(n_rows_A, n_cols_A);
-    int single_test_size = 512;
+    int single_test_size = 1024;
 
     kukri::Timer tmr;
 
@@ -389,7 +372,7 @@ int main(int argc, char *argv[]) {
     //kukri_mm_test(kukri::half_mm_v01, single_test_size, "Naive Half");
     //kukri_mm_test(kukri::half_mm_v02, single_test_size, "Shared Memory", test);
     kukri_mm_test(kukri::half_mm_v03, single_test_size, "Improved Shared Memory", test);
-    kukri_mm_test(kukri::half_mm_v04, single_test_size, "Random Try", test);
+    kukri_mm_test(kukri::half_mm_v04, single_test_size, "Coalasced", test);
 
     //mm_test(n_rows_A, n_cols_A, n_rows_B, n_cols_B);
 
