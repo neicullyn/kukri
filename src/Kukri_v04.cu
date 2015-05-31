@@ -5,7 +5,7 @@ using namespace kukri;
 #define _BLOCK_SIZE_X_V04 32
 #define _BLOCK_SIZE_Y_V04 16
 #define _STRID_Y_V04 _BLOCK_SIZE_Y_V04
-#define _N_LINE_Y_V04 (_BOX_V04 / _BLOCK_SIZE_Y_V04)
+#define _N_LINE_Y_V04 ((_BOX_V04 + _BLOCK_SIZE_Y_V04 - 1) / _BLOCK_SIZE_Y_V04)
 
 void kukri::half_mm_v04(const half *d_A, const half *d_B, half *d_C, int M, int N, int K) {
     dim3 grid_size;
@@ -65,14 +65,12 @@ __global__ void kukri::_half_mm_v04_kernel(const half *d_A, const half *d_B, hal
         if (x < m_limit) {
             for (int y = threadIdx.y; y < k_limit; y += _STRID_Y_V04) {
                 buf_A[IDX2C(x, y, _BOX_V04 + 1)] = __half2float(d_A[IDX2C(x + m_offset, y + k_offset, M)]);
-                //buf_A[IDX2C(x, y, _BOX_V04)] = __half2float(1);
             }
         }
 
         if (x < k_limit) {
             for (int y = threadIdx.y; y < n_limit; y += _STRID_Y_V04) {
                 buf_B[IDX2C(x, y, _BOX_V04 + 1)] = __half2float(d_B[IDX2C(x + k_offset, y + n_offset, K)]);
-                //buf_B[IDX2C(x, y, _BOX_V04)] = __half2float(1);
             }
         }
 
@@ -87,16 +85,15 @@ __global__ void kukri::_half_mm_v04_kernel(const half *d_A, const half *d_B, hal
 
                     if (y < n_limit) {                    
                         float b = buf_B[IDX2C(k, y, _BOX_V04 + 1)];
-                        //   = buf_A[y * _BOX_V04 + k]
-                        //   = buf_A[yo[i] + k]
-                        //float a = buf_A[yo[i] + k];
                         val[i] += a * b;
                     }
                 }
             }
         }        
+
+        __syncthreads();
     }
-    //__syncthreads();
+
 
     if (x < m_limit) {
         for (int i = 0; i < _N_LINE_Y_V04; i++) {

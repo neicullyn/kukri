@@ -84,15 +84,17 @@ void naive_mm(float *h_A, float *h_B, float *h_C, int M, int N, int K) {
     }
 }
 
-void blas_mm_test(float *h_A, float *h_B, float *h_C, int M, int N, int K) {
-    printf("\n");
-    printf("---cuBlas---\n");
-    printf("M = %d, N = %d, K = %d\n", M, N, K);
+void blas_mm_test(float *h_A, float *h_B, float *h_C, int M, int N, int K, bool quiet=false) {
+    if (!quiet) {
+        printf("\n");
+        printf("---cuBlas---\n");
+        printf("M = %d, N = %d, K = %d\n", M, N, K);
+    }
     kukri::Timer h2d;
     kukri::Timer mm;
     kukri::Timer d2h;
 
-    printf("Initiating BLAS...\n");
+    if(!quiet) printf("Initiating BLAS...\n");
     float *d_A;
     float *d_B;
     float *d_C;
@@ -104,29 +106,29 @@ void blas_mm_test(float *h_A, float *h_B, float *h_C, int M, int N, int K) {
     cublasHandle_t handle;
     blasErrChk(cublasCreate(&handle));
 
-    printf("h2d...");
+    if (!quiet) printf("h2d...");
     h2d.tic();
     blasErrChk(cublasSetVector(M * K, sizeof(float), h_A, 1, d_A, 1));
     blasErrChk(cublasSetVector(K * N, sizeof(float), h_B, 1, d_B, 1));
     h2d.toc();
-    printf("%f ms\n", h2d.get_val());
+    if (!quiet) printf("%f ms\n", h2d.get_val());
 
-    printf("mm ...");
+    if (!quiet) printf("mm ...");
     mm.tic();
     float alpha = 1;
     float beta = 0;
     blasErrChk(cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, M, N, K, &alpha,
         d_A, M, d_B, K, &beta, d_C, M));
     mm.toc();
-    printf("%f ms\n", mm.get_val());
+    if (!quiet) printf("%f ms\n", mm.get_val());
 
-    printf("d2h...");
+    if (!quiet) printf("d2h...");
     d2h.tic();
     blasErrChk(cublasGetVector(M * N, sizeof(float), d_C, 1, h_C, 1));
     d2h.toc();
-    printf("%f ms\n", d2h.get_val());
+    if (!quiet) printf("%f ms\n", d2h.get_val());
 
-    printf("overall: %f ms\n", h2d.get_val() + mm.get_val() + d2h.get_val());
+    if (!quiet) printf("overall: %f ms\n", h2d.get_val() + mm.get_val() + d2h.get_val());
 
     gpuErrChk(cudaFree(d_A));
     gpuErrChk(cudaFree(d_B));
@@ -142,25 +144,25 @@ void blas_mm_test(int size) {
     generate_normal(h_A, size * size, 0, 1);
     generate_normal(h_B, size * size, 0, 1);
 
-    naive_mm(h_A, h_B, h_C_naive, size, size, size);
+    //naive_mm(h_A, h_B, h_C_naive, size, size, size);
 
     blas_mm_test(h_A, h_B, h_C, size, size, size);
 
-    bool flag = true;
-    for (int i = 0; i < size; i++) {
-        for (int j = 0; j < size; j++) {
-            float diff = h_C[j * size + i] - h_C_naive[j * size + i];
-            if (abs(diff) > 1e-6) {
-                printf("Test fails: i = %d, j = %d, C[i,j] = %f, C_naive[i,j] = %f\n",
-                        i, j, h_C[j * size + i], h_C_naive[j * size + i]);
-                flag = false;
-            }
-        }
-    }
+    //bool flag = true;
+    //for (int i = 0; i < size; i++) {
+    //    for (int j = 0; j < size; j++) {
+    //        float diff = h_C[j * size + i] - h_C_naive[j * size + i];
+    //        if (abs(diff) > 1e-6) {
+    //            printf("Test fails: i = %d, j = %d, C[i,j] = %f, C_naive[i,j] = %f\n",
+    //                    i, j, h_C[j * size + i], h_C_naive[j * size + i]);
+    //            flag = false;
+    //        }
+    //    }
+    //}
 
-    if (flag) {
-        printf("[Test Pass]\n");
-    }
+    //if (flag) {
+    //    printf("[Test Pass]\n");
+    //}
 
     delete[] h_A;
     delete[] h_B;
@@ -241,7 +243,8 @@ void kukri_mm_test(kukri::half_mm_func_t func, int size, char *test_name = NULL,
     kukri::array_half2float_host(h_A, h_Ah, size * size);
     kukri::array_half2float_host(h_B, h_Bh, size * size);
 
-    naive_mm(h_A, h_B, h_C_naive, size, size, size);
+    //naive_mm(h_A, h_B, h_C_naive, size, size, size);
+    blas_mm_test(h_A, h_B, h_C_naive, size, size, size, true);
 
     kukri::array_float2half_host(h_Ch_naive, h_C_naive, size * size);
     kukri::array_half2float_host(h_C_naive, h_Ch_naive, size * size);
@@ -258,7 +261,7 @@ void kukri_mm_test(kukri::half_mm_func_t func, int size, char *test_name = NULL,
             float diff = h_C[j * size + i] - h_C_naive[j * size + i];
             rcd_rerr.update(diff / h_C_naive[j * size + i]);
             if (en_test && (fabs(diff) > 0.001 * fabs(h_C_naive[j * size + i]))) {
-                printf("Test fails: i = %d, j = %d, C[i,j] = %f, C_naive[i,j] = %f\n",
+                printf("Test fails: i = %d, j = %d, C[i,j] = %f, C_blas[i,j] = %f\n",
                     i, j, h_C[j * size + i], h_C_naive[j * size + i]);
                 flag = false;
             }
@@ -362,16 +365,16 @@ int main(int argc, char *argv[]) {
 
 
     //kukri_float2half2float_test(n_rows_A, n_cols_A);
-    int single_test_size = 1024;
+    int single_test_size = 256;
 
     kukri::Timer tmr;
 
-    bool test = false;
+    bool test = true;
 
     blas_mm_test(single_test_size);
     //kukri_mm_test(kukri::half_mm_v01, single_test_size, "Naive Half");
     //kukri_mm_test(kukri::half_mm_v02, single_test_size, "Shared Memory", test);
-    kukri_mm_test(kukri::half_mm_v03, single_test_size, "Improved Shared Memory", test);
+    //kukri_mm_test(kukri::half_mm_v03, single_test_size, "Improved Shared Memory", test);
     kukri_mm_test(kukri::half_mm_v04, single_test_size, "Coalasced", test);
 
     //mm_test(n_rows_A, n_cols_A, n_rows_B, n_cols_B);
