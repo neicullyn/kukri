@@ -12,6 +12,7 @@
 
 	// .globl	_ZN5kukri19_half_mm_v03_kernelEPKtS1_Ptiiii
 // _ZN5kukri19_half_mm_v03_kernelEPKtS1_Ptiiii$__cuda_local_var_227024_34_non_const_buf_A has been demoted
+// _ZN5kukri19_half_mm_v03_kernelEPKtS1_Ptiiii$__cuda_local_var_227025_34_non_const_buf_B has been demoted
 
 .visible .entry _ZN5kukri19_half_mm_v03_kernelEPKtS1_Ptiiii(
 	.param .u64 _ZN5kukri19_half_mm_v03_kernelEPKtS1_Ptiiii_param_0,
@@ -23,38 +24,30 @@
 	.param .u32 _ZN5kukri19_half_mm_v03_kernelEPKtS1_Ptiiii_param_6
 )
 {
-	.local .align 4 .b8 	__local_depot0[256];
-	.reg .b64 	%SP;
-	.reg .b64 	%SPL;
-	.reg .pred 	%p<32>;
+	.reg .pred 	%p<37>;
 	.reg .s16 	%rs<11>;
 	.reg .f32 	%f<84>;
-	.reg .s32 	%r<73>;
-	.reg .s64 	%rd<36>;
+	.reg .s32 	%r<123>;
+	.reg .s64 	%rd<67>;
 	// demoted variable
 	.shared .align 4 .b8 _ZN5kukri19_half_mm_v03_kernelEPKtS1_Ptiiii$__cuda_local_var_227024_34_non_const_buf_A[16384];
+	// demoted variable
+	.shared .align 4 .b8 _ZN5kukri19_half_mm_v03_kernelEPKtS1_Ptiiii$__cuda_local_var_227025_34_non_const_buf_B[16384];
 
-	mov.u64 	%rd35, __local_depot0;
-	cvta.local.u64 	%SP, %rd35;
-	ld.param.u64 	%rd15, [_ZN5kukri19_half_mm_v03_kernelEPKtS1_Ptiiii_param_0];
-	ld.param.u64 	%rd16, [_ZN5kukri19_half_mm_v03_kernelEPKtS1_Ptiiii_param_1];
-	ld.param.u64 	%rd17, [_ZN5kukri19_half_mm_v03_kernelEPKtS1_Ptiiii_param_2];
-	ld.param.u32 	%r17, [_ZN5kukri19_half_mm_v03_kernelEPKtS1_Ptiiii_param_3];
-	ld.param.u32 	%r20, [_ZN5kukri19_half_mm_v03_kernelEPKtS1_Ptiiii_param_4];
-	ld.param.u32 	%r18, [_ZN5kukri19_half_mm_v03_kernelEPKtS1_Ptiiii_param_5];
-	ld.param.u32 	%r19, [_ZN5kukri19_half_mm_v03_kernelEPKtS1_Ptiiii_param_6];
-	mov.u32 	%r21, %ctaid.y;
-	shl.b32 	%r22, %r21, 6;
-	sub.s32 	%r23, %r20, %r22;
-	mov.u32 	%r24, 64;
-	min.s32 	%r1, %r23, %r24;
-	mov.u32 	%r25, %ctaid.x;
-	shl.b32 	%r26, %r25, 6;
-	sub.s32 	%r27, %r17, %r26;
-	min.s32 	%r2, %r27, %r24;
-	add.u64 	%rd18, %SP, 0;
-	cvta.to.local.u64 	%rd1, %rd18;
-	mov.u32 	%r3, %tid.y;
+	ld.param.u64 	%rd2, [_ZN5kukri19_half_mm_v03_kernelEPKtS1_Ptiiii_param_0];
+	ld.param.u64 	%rd3, [_ZN5kukri19_half_mm_v03_kernelEPKtS1_Ptiiii_param_1];
+	ld.param.u64 	%rd4, [_ZN5kukri19_half_mm_v03_kernelEPKtS1_Ptiiii_param_2];
+	ld.param.u32 	%r25, [_ZN5kukri19_half_mm_v03_kernelEPKtS1_Ptiiii_param_3];
+	ld.param.u32 	%r26, [_ZN5kukri19_half_mm_v03_kernelEPKtS1_Ptiiii_param_4];
+	ld.param.u32 	%r27, [_ZN5kukri19_half_mm_v03_kernelEPKtS1_Ptiiii_param_5];
+	ld.param.u32 	%r28, [_ZN5kukri19_half_mm_v03_kernelEPKtS1_Ptiiii_param_6];
+	mov.u32 	%r29, %ctaid.x;
+	shl.b32 	%r30, %r29, 6;
+	sub.s32 	%r31, %r25, %r30;
+	setp.lt.s32	%p2, %r31, 64;
+	cvt.s32.s16 	%r32, %r31;
+	selp.b32	%r1, %r32, 64, %p2;
+	mov.u32 	%r2, %tid.y;
 	mov.f32 	%f83, 0f00000000;
 	mov.f32 	%f82, %f83;
 	mov.f32 	%f81, %f83;
@@ -63,10 +56,10 @@
 	mov.f32 	%f78, %f83;
 	mov.f32 	%f77, %f83;
 	mov.f32 	%f76, %f83;
-	setp.lt.s32	%p2, %r19, 1;
-	@%p2 bra 	BB0_26;
+	setp.lt.s32	%p3, %r28, 1;
+	@%p3 bra 	BB0_27;
 
-	mov.u32 	%r68, 0;
+	mov.u32 	%r118, 0;
 	mov.f32 	%f83, 0f00000000;
 	mov.f32 	%f82, %f83;
 	mov.f32 	%f81, %f83;
@@ -75,270 +68,361 @@
 	mov.f32 	%f78, %f83;
 	mov.f32 	%f77, %f83;
 	mov.f32 	%f76, %f83;
-	cvta.to.global.u64 	%rd24, %rd16;
-	cvta.to.global.u64 	%rd2, %rd15;
+	cvta.to.global.u64 	%rd1, %rd3;
+	cvta.to.global.u64 	%rd5, %rd2;
 
 BB0_2:
-	mov.u32 	%r5, %tid.x;
-	shl.b32 	%r6, %r68, 6;
-	sub.s32 	%r29, %r18, %r6;
-	min.s32 	%r7, %r29, %r24;
-	setp.ge.s32	%p3, %r5, %r7;
-	setp.ge.s32	%p4, %r3, %r2;
-	or.pred  	%p5, %p3, %p4;
-	@%p5 bra 	BB0_5;
+	shl.b32 	%r4, %r118, 6;
+	sub.s32 	%r34, %r27, %r4;
+	setp.lt.s32	%p4, %r34, 64;
+	cvt.s32.s16 	%r35, %r34;
+	selp.b32	%r5, %r35, 64, %p4;
+	mov.u32 	%r36, %tid.x;
+	setp.ge.s32	%p5, %r36, %r5;
+	setp.ge.s32	%p6, %r2, %r1;
+	or.pred  	%p7, %p5, %p6;
+	@%p7 bra 	BB0_5;
 
-	add.s32 	%r31, %r6, %r5;
-	mad.lo.s32 	%r9, %r31, %r17, %r26;
-	mov.u32 	%r71, %r3;
+	mov.u32 	%r121, %r2;
 
 BB0_4:
-	add.s32 	%r34, %r9, %r71;
-	mul.wide.s32 	%rd19, %r34, 2;
-	add.s64 	%rd20, %rd2, %rd19;
-	ld.global.u16 	%rs1, [%rd20];
+	mov.u32 	%r6, %r121;
+	add.s32 	%r38, %r4, %r36;
+	mad.lo.s32 	%r41, %r38, %r25, %r30;
+	add.s32 	%r42, %r41, %r6;
+	mul.wide.s32 	%rd6, %r42, 2;
+	add.s64 	%rd7, %rd5, %rd6;
+	ld.global.u16 	%rs1, [%rd7];
 	{
 	.reg .b16 %temp;
 	mov.b16 	%temp, %rs1;
 	cvt.f32.f16 	%f66, %temp;
 	}
-	shl.b32 	%r35, %r71, 6;
-	add.s32 	%r36, %r35, %r5;
-	mul.wide.s32 	%rd21, %r36, 4;
-	mov.u64 	%rd22, _ZN5kukri19_half_mm_v03_kernelEPKtS1_Ptiiii$__cuda_local_var_227024_34_non_const_buf_A;
-	add.s64 	%rd23, %rd22, %rd21;
-	st.shared.f32 	[%rd23], %f66;
-	add.s32 	%r71, %r71, 8;
-	setp.lt.s32	%p6, %r71, %r2;
-	@%p6 bra 	BB0_4;
+	shl.b32 	%r43, %r6, 6;
+	add.s32 	%r44, %r43, %r36;
+	mul.wide.s32 	%rd8, %r44, 4;
+	mov.u64 	%rd9, _ZN5kukri19_half_mm_v03_kernelEPKtS1_Ptiiii$__cuda_local_var_227024_34_non_const_buf_A;
+	add.s64 	%rd10, %rd9, %rd8;
+	st.shared.f32 	[%rd10], %f66;
+	add.s32 	%r7, %r6, 8;
+	setp.lt.s32	%p8, %r7, %r1;
+	mov.u32 	%r121, %r7;
+	@%p8 bra 	BB0_4;
 
 BB0_5:
-	mad.lo.s32 	%r38, %r21, 64, %r5;
-	mad.lo.s32 	%r39, %r18, %r38, %r3;
-	mad.lo.s32 	%r40, %r68, 64, %r39;
-	mul.wide.s32 	%rd25, %r40, 2;
-	add.s64 	%rd31, %rd24, %rd25;
-	setp.lt.s32	%p7, %r5, %r1;
-	setp.lt.s32	%p8, %r3, %r7;
-	and.pred  	%p9, %p7, %p8;
-	mul.wide.s32 	%rd26, %r3, 4;
-	add.s64 	%rd32, %rd1, %rd26;
-	mov.u32 	%r70, %r3;
-	@!%p9 bra 	BB0_7;
+	mov.u32 	%r46, %ctaid.y;
+	shl.b32 	%r47, %r46, 6;
+	sub.s32 	%r48, %r26, %r47;
+	setp.lt.s32	%p9, %r48, 64;
+	cvt.s32.s16 	%r49, %r48;
+	selp.b32	%r50, %r49, 64, %p9;
+	setp.lt.s32	%p10, %r36, %r50;
+	setp.lt.s32	%p11, %r2, %r5;
+	and.pred  	%p12, %p10, %p11;
+	@!%p12 bra 	BB0_8;
 	bra.uni 	BB0_6;
 
 BB0_6:
-	mov.u32 	%r12, %r70;
-	ld.global.u16 	%rs2, [%rd31];
+	add.s32 	%r53, %r36, %r47;
+	mad.lo.s32 	%r9, %r53, %r27, %r4;
+	mov.u32 	%r120, %r2;
+
+BB0_7:
+	add.s32 	%r54, %r9, %r120;
+	mul.wide.s32 	%rd11, %r54, 2;
+	add.s64 	%rd12, %rd1, %rd11;
+	ld.global.u16 	%rs2, [%rd12];
 	{
 	.reg .b16 %temp;
 	mov.b16 	%temp, %rs2;
 	cvt.f32.f16 	%f67, %temp;
 	}
-	st.local.f32 	[%rd32], %f67;
-	add.s64 	%rd32, %rd32, 32;
-	add.s64 	%rd31, %rd31, 16;
-	add.s32 	%r13, %r12, 8;
-	setp.lt.s32	%p10, %r13, %r7;
-	mov.u32 	%r70, %r13;
-	@%p10 bra 	BB0_6;
-
-BB0_7:
-	bar.sync 	0;
-	setp.gt.s32	%p11, %r7, 0;
-	and.pred  	%p12, %p7, %p11;
-	shl.b32 	%r44, %r3, 6;
-	mul.wide.s32 	%rd27, %r44, 4;
-	mov.u64 	%rd28, _ZN5kukri19_half_mm_v03_kernelEPKtS1_Ptiiii$__cuda_local_var_227024_34_non_const_buf_A;
-	add.s64 	%rd34, %rd28, %rd27;
-	mov.u32 	%r72, 0;
-	mov.u64 	%rd33, %rd1;
-	@!%p12 bra 	BB0_25;
-	bra.uni 	BB0_8;
+	shl.b32 	%r55, %r120, 6;
+	add.s32 	%r56, %r55, %r36;
+	mul.wide.s32 	%rd13, %r56, 4;
+	mov.u64 	%rd14, _ZN5kukri19_half_mm_v03_kernelEPKtS1_Ptiiii$__cuda_local_var_227025_34_non_const_buf_B;
+	add.s64 	%rd15, %rd14, %rd13;
+	st.shared.f32 	[%rd15], %f67;
+	add.s32 	%r120, %r120, 8;
+	setp.lt.s32	%p13, %r120, %r5;
+	@%p13 bra 	BB0_7;
 
 BB0_8:
-	mov.u64 	%rd10, %rd33;
-	ld.local.f32 	%f17, [%rd10];
-	@%p4 bra 	BB0_10;
+	bar.sync 	0;
+	setp.gt.s32	%p15, %r5, 0;
+	and.pred  	%p16, %p10, %p15;
+	mov.u32 	%r122, 0;
+	@!%p16 bra 	BB0_26;
+	bra.uni 	BB0_9;
 
-	ld.shared.f32 	%f68, [%rd34];
+BB0_9:
+	cvt.s32.s16 	%r64, %r2;
+	shl.b32 	%r66, %r122, 6;
+	add.s32 	%r67, %r66, %r36;
+	mul.wide.s32 	%rd16, %r67, 4;
+	mov.u64 	%rd17, _ZN5kukri19_half_mm_v03_kernelEPKtS1_Ptiiii$__cuda_local_var_227025_34_non_const_buf_B;
+	add.s64 	%rd18, %rd17, %rd16;
+	ld.shared.f32 	%f17, [%rd18];
+	shl.b32 	%r13, %r2, 6;
+	setp.ge.s32	%p17, %r64, %r1;
+	@%p17 bra 	BB0_11;
+
+	add.s32 	%r68, %r13, %r122;
+	mul.wide.s32 	%rd19, %r68, 4;
+	mov.u64 	%rd20, _ZN5kukri19_half_mm_v03_kernelEPKtS1_Ptiiii$__cuda_local_var_227024_34_non_const_buf_A;
+	add.s64 	%rd21, %rd20, %rd19;
+	ld.shared.f32 	%f68, [%rd21];
 	fma.rn.f32 	%f83, %f17, %f68, %f83;
 
-BB0_10:
-	add.s32 	%r45, %r3, 8;
-	setp.ge.s32	%p14, %r45, %r2;
-	@%p14 bra 	BB0_12;
+BB0_11:
+	add.s32 	%r69, %r2, 8;
+	cvt.s32.s16 	%r70, %r69;
+	setp.ge.s32	%p18, %r70, %r1;
+	@%p18 bra 	BB0_13;
 
-	ld.shared.f32 	%f69, [%rd34+2048];
+	add.s32 	%r71, %r13, %r122;
+	mul.wide.s32 	%rd22, %r71, 4;
+	mov.u64 	%rd23, _ZN5kukri19_half_mm_v03_kernelEPKtS1_Ptiiii$__cuda_local_var_227024_34_non_const_buf_A;
+	add.s64 	%rd24, %rd23, %rd22;
+	ld.shared.f32 	%f69, [%rd24+2048];
 	fma.rn.f32 	%f82, %f17, %f69, %f82;
 
-BB0_12:
-	add.s32 	%r46, %r3, 16;
-	setp.ge.s32	%p15, %r46, %r2;
-	@%p15 bra 	BB0_14;
+BB0_13:
+	add.s32 	%r72, %r2, 16;
+	cvt.s32.s16 	%r73, %r72;
+	setp.ge.s32	%p19, %r73, %r1;
+	@%p19 bra 	BB0_15;
 
-	ld.shared.f32 	%f70, [%rd34+4096];
+	add.s32 	%r74, %r13, %r122;
+	mul.wide.s32 	%rd25, %r74, 4;
+	mov.u64 	%rd26, _ZN5kukri19_half_mm_v03_kernelEPKtS1_Ptiiii$__cuda_local_var_227024_34_non_const_buf_A;
+	add.s64 	%rd27, %rd26, %rd25;
+	ld.shared.f32 	%f70, [%rd27+4096];
 	fma.rn.f32 	%f81, %f17, %f70, %f81;
 
-BB0_14:
-	add.s32 	%r47, %r3, 24;
-	setp.ge.s32	%p16, %r47, %r2;
-	@%p16 bra 	BB0_16;
+BB0_15:
+	add.s32 	%r75, %r2, 24;
+	cvt.s32.s16 	%r76, %r75;
+	setp.ge.s32	%p20, %r76, %r1;
+	@%p20 bra 	BB0_17;
 
-	ld.shared.f32 	%f71, [%rd34+6144];
+	add.s32 	%r77, %r13, %r122;
+	mul.wide.s32 	%rd28, %r77, 4;
+	mov.u64 	%rd29, _ZN5kukri19_half_mm_v03_kernelEPKtS1_Ptiiii$__cuda_local_var_227024_34_non_const_buf_A;
+	add.s64 	%rd30, %rd29, %rd28;
+	ld.shared.f32 	%f71, [%rd30+6144];
 	fma.rn.f32 	%f80, %f17, %f71, %f80;
 
-BB0_16:
-	add.s32 	%r48, %r3, 32;
-	setp.ge.s32	%p17, %r48, %r2;
-	@%p17 bra 	BB0_18;
+BB0_17:
+	add.s32 	%r78, %r2, 32;
+	cvt.s32.s16 	%r79, %r78;
+	setp.ge.s32	%p21, %r79, %r1;
+	@%p21 bra 	BB0_19;
 
-	ld.shared.f32 	%f72, [%rd34+8192];
+	add.s32 	%r80, %r13, %r122;
+	mul.wide.s32 	%rd31, %r80, 4;
+	mov.u64 	%rd32, _ZN5kukri19_half_mm_v03_kernelEPKtS1_Ptiiii$__cuda_local_var_227024_34_non_const_buf_A;
+	add.s64 	%rd33, %rd32, %rd31;
+	ld.shared.f32 	%f72, [%rd33+8192];
 	fma.rn.f32 	%f79, %f17, %f72, %f79;
 
-BB0_18:
-	add.s32 	%r49, %r3, 40;
-	setp.ge.s32	%p18, %r49, %r2;
-	@%p18 bra 	BB0_20;
+BB0_19:
+	add.s32 	%r81, %r2, 40;
+	cvt.s32.s16 	%r82, %r81;
+	setp.ge.s32	%p22, %r82, %r1;
+	@%p22 bra 	BB0_21;
 
-	ld.shared.f32 	%f73, [%rd34+10240];
+	add.s32 	%r83, %r13, %r122;
+	mul.wide.s32 	%rd34, %r83, 4;
+	mov.u64 	%rd35, _ZN5kukri19_half_mm_v03_kernelEPKtS1_Ptiiii$__cuda_local_var_227024_34_non_const_buf_A;
+	add.s64 	%rd36, %rd35, %rd34;
+	ld.shared.f32 	%f73, [%rd36+10240];
 	fma.rn.f32 	%f78, %f17, %f73, %f78;
 
-BB0_20:
-	add.s32 	%r50, %r3, 48;
-	setp.ge.s32	%p19, %r50, %r2;
-	@%p19 bra 	BB0_22;
+BB0_21:
+	add.s32 	%r84, %r2, 48;
+	cvt.s32.s16 	%r85, %r84;
+	setp.ge.s32	%p23, %r85, %r1;
+	@%p23 bra 	BB0_23;
 
-	ld.shared.f32 	%f74, [%rd34+12288];
+	add.s32 	%r86, %r13, %r122;
+	mul.wide.s32 	%rd37, %r86, 4;
+	mov.u64 	%rd38, _ZN5kukri19_half_mm_v03_kernelEPKtS1_Ptiiii$__cuda_local_var_227024_34_non_const_buf_A;
+	add.s64 	%rd39, %rd38, %rd37;
+	ld.shared.f32 	%f74, [%rd39+12288];
 	fma.rn.f32 	%f77, %f17, %f74, %f77;
 
-BB0_22:
-	add.s32 	%r51, %r3, 56;
-	setp.ge.s32	%p20, %r51, %r2;
-	@%p20 bra 	BB0_24;
+BB0_23:
+	add.s32 	%r87, %r2, 56;
+	cvt.s32.s16 	%r88, %r87;
+	setp.ge.s32	%p24, %r88, %r1;
+	@%p24 bra 	BB0_25;
 
-	ld.shared.f32 	%f75, [%rd34+14336];
+	add.s32 	%r90, %r13, %r122;
+	mul.wide.s32 	%rd40, %r90, 4;
+	mov.u64 	%rd41, _ZN5kukri19_half_mm_v03_kernelEPKtS1_Ptiiii$__cuda_local_var_227024_34_non_const_buf_A;
+	add.s64 	%rd42, %rd41, %rd40;
+	ld.shared.f32 	%f75, [%rd42+14336];
 	fma.rn.f32 	%f76, %f17, %f75, %f76;
 
-BB0_24:
-	add.s64 	%rd34, %rd34, 4;
-	add.s64 	%rd13, %rd10, 4;
-	add.s32 	%r72, %r72, 1;
-	setp.lt.s32	%p21, %r72, %r7;
-	mov.u64 	%rd33, %rd13;
-	@%p21 bra 	BB0_8;
-
 BB0_25:
-	add.s32 	%r68, %r68, 1;
-	setp.lt.s32	%p22, %r68, %r19;
-	@%p22 bra 	BB0_2;
+	add.s32 	%r122, %r122, 1;
+	setp.lt.s32	%p25, %r122, %r5;
+	@%p25 bra 	BB0_9;
 
 BB0_26:
-	mov.u32 	%r52, %tid.x;
-	setp.ge.s32	%p23, %r52, %r1;
-	@%p23 bra 	BB0_43;
+	add.s32 	%r118, %r118, 1;
+	setp.lt.s32	%p26, %r118, %r28;
+	@%p26 bra 	BB0_2;
 
-	add.s32 	%r56, %r52, %r22;
-	mad.lo.s32 	%r59, %r56, %r17, %r26;
-	add.s32 	%r60, %r59, %r3;
-	cvta.to.global.u64 	%rd29, %rd17;
-	mul.wide.s32 	%rd30, %r60, 2;
-	add.s64 	%rd14, %rd29, %rd30;
-	setp.ge.s32	%p24, %r3, %r2;
-	@%p24 bra 	BB0_29;
+BB0_27:
+	mov.u32 	%r91, %ctaid.y;
+	shl.b32 	%r92, %r91, 6;
+	sub.s32 	%r93, %r26, %r92;
+	setp.lt.s32	%p27, %r93, 64;
+	cvt.s32.s16 	%r94, %r93;
+	selp.b32	%r95, %r94, 64, %p27;
+	mov.u32 	%r96, %tid.x;
+	setp.ge.s32	%p28, %r96, %r95;
+	@%p28 bra 	BB0_44;
+
+	add.s32 	%r100, %r96, %r92;
+	mad.lo.s32 	%r16, %r100, %r25, %r30;
+	cvt.s32.s16 	%r17, %r2;
+	setp.ge.s32	%p29, %r17, %r1;
+	@%p29 bra 	BB0_30;
 
 	{
 	.reg .b16 %temp;
 	cvt.rn.f16.f32 	%temp, %f83;
 	mov.b16 	%rs3, %temp;
 }
-	st.global.u16 	[%rd14], %rs3;
+	add.s32 	%r103, %r16, %r17;
+	cvta.to.global.u64 	%rd43, %rd4;
+	mul.wide.s32 	%rd44, %r103, 2;
+	add.s64 	%rd45, %rd43, %rd44;
+	st.global.u16 	[%rd45], %rs3;
 
-BB0_29:
-	add.s32 	%r61, %r3, 8;
-	setp.ge.s32	%p25, %r61, %r2;
-	@%p25 bra 	BB0_31;
+BB0_30:
+	add.s32 	%r104, %r2, 8;
+	cvt.s32.s16 	%r18, %r104;
+	setp.ge.s32	%p30, %r18, %r1;
+	@%p30 bra 	BB0_32;
 
 	{
 	.reg .b16 %temp;
 	cvt.rn.f16.f32 	%temp, %f82;
 	mov.b16 	%rs4, %temp;
 }
-	st.global.u16 	[%rd14+16], %rs4;
+	add.s32 	%r105, %r16, %r18;
+	cvta.to.global.u64 	%rd46, %rd4;
+	mul.wide.s32 	%rd47, %r105, 2;
+	add.s64 	%rd48, %rd46, %rd47;
+	st.global.u16 	[%rd48], %rs4;
 
-BB0_31:
-	add.s32 	%r62, %r3, 16;
-	setp.ge.s32	%p26, %r62, %r2;
-	@%p26 bra 	BB0_33;
+BB0_32:
+	add.s32 	%r106, %r2, 16;
+	cvt.s32.s16 	%r19, %r106;
+	setp.ge.s32	%p31, %r19, %r1;
+	@%p31 bra 	BB0_34;
 
 	{
 	.reg .b16 %temp;
 	cvt.rn.f16.f32 	%temp, %f81;
 	mov.b16 	%rs5, %temp;
 }
-	st.global.u16 	[%rd14+32], %rs5;
+	add.s32 	%r107, %r16, %r19;
+	cvta.to.global.u64 	%rd49, %rd4;
+	mul.wide.s32 	%rd50, %r107, 2;
+	add.s64 	%rd51, %rd49, %rd50;
+	st.global.u16 	[%rd51], %rs5;
 
-BB0_33:
-	add.s32 	%r63, %r3, 24;
-	setp.ge.s32	%p27, %r63, %r2;
-	@%p27 bra 	BB0_35;
+BB0_34:
+	add.s32 	%r108, %r2, 24;
+	cvt.s32.s16 	%r20, %r108;
+	setp.ge.s32	%p32, %r20, %r1;
+	@%p32 bra 	BB0_36;
 
 	{
 	.reg .b16 %temp;
 	cvt.rn.f16.f32 	%temp, %f80;
 	mov.b16 	%rs6, %temp;
 }
-	st.global.u16 	[%rd14+48], %rs6;
+	add.s32 	%r109, %r16, %r20;
+	cvta.to.global.u64 	%rd52, %rd4;
+	mul.wide.s32 	%rd53, %r109, 2;
+	add.s64 	%rd54, %rd52, %rd53;
+	st.global.u16 	[%rd54], %rs6;
 
-BB0_35:
-	add.s32 	%r64, %r3, 32;
-	setp.ge.s32	%p28, %r64, %r2;
-	@%p28 bra 	BB0_37;
+BB0_36:
+	add.s32 	%r110, %r2, 32;
+	cvt.s32.s16 	%r21, %r110;
+	setp.ge.s32	%p33, %r21, %r1;
+	@%p33 bra 	BB0_38;
 
 	{
 	.reg .b16 %temp;
 	cvt.rn.f16.f32 	%temp, %f79;
 	mov.b16 	%rs7, %temp;
 }
-	st.global.u16 	[%rd14+64], %rs7;
+	add.s32 	%r111, %r16, %r21;
+	cvta.to.global.u64 	%rd55, %rd4;
+	mul.wide.s32 	%rd56, %r111, 2;
+	add.s64 	%rd57, %rd55, %rd56;
+	st.global.u16 	[%rd57], %rs7;
 
-BB0_37:
-	add.s32 	%r65, %r3, 40;
-	setp.ge.s32	%p29, %r65, %r2;
-	@%p29 bra 	BB0_39;
+BB0_38:
+	add.s32 	%r112, %r2, 40;
+	cvt.s32.s16 	%r22, %r112;
+	setp.ge.s32	%p34, %r22, %r1;
+	@%p34 bra 	BB0_40;
 
 	{
 	.reg .b16 %temp;
 	cvt.rn.f16.f32 	%temp, %f78;
 	mov.b16 	%rs8, %temp;
 }
-	st.global.u16 	[%rd14+80], %rs8;
+	add.s32 	%r113, %r16, %r22;
+	cvta.to.global.u64 	%rd58, %rd4;
+	mul.wide.s32 	%rd59, %r113, 2;
+	add.s64 	%rd60, %rd58, %rd59;
+	st.global.u16 	[%rd60], %rs8;
 
-BB0_39:
-	add.s32 	%r66, %r3, 48;
-	setp.ge.s32	%p30, %r66, %r2;
-	@%p30 bra 	BB0_41;
+BB0_40:
+	add.s32 	%r114, %r2, 48;
+	cvt.s32.s16 	%r23, %r114;
+	setp.ge.s32	%p35, %r23, %r1;
+	@%p35 bra 	BB0_42;
 
 	{
 	.reg .b16 %temp;
 	cvt.rn.f16.f32 	%temp, %f77;
 	mov.b16 	%rs9, %temp;
 }
-	st.global.u16 	[%rd14+96], %rs9;
+	add.s32 	%r115, %r16, %r23;
+	cvta.to.global.u64 	%rd61, %rd4;
+	mul.wide.s32 	%rd62, %r115, 2;
+	add.s64 	%rd63, %rd61, %rd62;
+	st.global.u16 	[%rd63], %rs9;
 
-BB0_41:
-	add.s32 	%r67, %r3, 56;
-	setp.ge.s32	%p31, %r67, %r2;
-	@%p31 bra 	BB0_43;
+BB0_42:
+	add.s32 	%r116, %r2, 56;
+	cvt.s32.s16 	%r24, %r116;
+	setp.ge.s32	%p36, %r24, %r1;
+	@%p36 bra 	BB0_44;
 
 	{
 	.reg .b16 %temp;
 	cvt.rn.f16.f32 	%temp, %f76;
 	mov.b16 	%rs10, %temp;
 }
-	st.global.u16 	[%rd14+112], %rs10;
+	add.s32 	%r117, %r16, %r24;
+	cvta.to.global.u64 	%rd64, %rd4;
+	mul.wide.s32 	%rd65, %r117, 2;
+	add.s64 	%rd66, %rd64, %rd65;
+	st.global.u16 	[%rd66], %rs10;
 
-BB0_43:
+BB0_44:
 	ret;
 }
 

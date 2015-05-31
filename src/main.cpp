@@ -259,10 +259,13 @@ void kukri_mm_test(kukri::half_mm_func_t func, int size, char *test_name = NULL,
 
     kukri::array_half2float_host(h_C, h_Ch, size * size);
 
+    kukri::Recorder rcd_rerr;
+
     bool flag = true;
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
             float diff = h_C[j * size + i] - h_C_naive[j * size + i];
+            rcd_rerr.update(diff / h_C_naive[j * size + i]);
             if (en_test && (fabs(diff) > 0.02 * fabs(h_C_naive[j * size + i]))) {
                 printf("Test fails: i = %d, j = %d, C[i,j] = %f, C_naive[i,j] = %f\n",
                     i, j, h_C[j * size + i], h_C_naive[j * size + i]);
@@ -272,6 +275,7 @@ void kukri_mm_test(kukri::half_mm_func_t func, int size, char *test_name = NULL,
     }
 
     if (en_test && flag) {
+        printf("Relative Error (Maximum) : %lf\n", rcd_rerr.get_max_abs());
         printf("[Test Pass]\n");
     }
 
@@ -379,10 +383,12 @@ int main(int argc, char *argv[]) {
 
     kukri::Timer tmr;
 
+    bool test = true;
+
     blas_mm_test(single_test_size);
     //kukri_mm_test(kukri::half_mm_v01, single_test_size, "Naive Half");
-    kukri_mm_test(kukri::half_mm_v02, single_test_size, "Shared Memory", true);
-    kukri_mm_test(kukri::half_mm_v03, single_test_size, "Improved Shared Memory", true);
+    kukri_mm_test(kukri::half_mm_v02, single_test_size, "Shared Memory", test);
+    kukri_mm_test(kukri::half_mm_v03, single_test_size, "Improved Shared Memory", test);
 
     //mm_test(n_rows_A, n_cols_A, n_rows_B, n_cols_B);
 
