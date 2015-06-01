@@ -301,7 +301,7 @@ void kukri_mm_tex_test(kukri::half_mm_tex_func_t func, kukri::half *h_A, kukri::
     kukri::half *d_A, *d_B;
     kukri::half *d_C;
     size_t pitch_A, pitch_B;
-    
+   
     gpuErrChk(cudaMallocPitch(&d_A, &pitch_A, M * sizeof(kukri::half), K));
     gpuErrChk(cudaMallocPitch(&d_B, &pitch_B, K * sizeof(kukri::half), N));
 
@@ -353,8 +353,8 @@ void kukri_mm_tex_test(kukri::half_mm_tex_func_t func, int size, char *test_name
     kukri::half *h_Ch = new kukri::half[size * size];
     kukri::half *h_Ch_naive = new kukri::half[size * size];
 
-    generate_normal(h_A, size * size, 0, 1);
-    generate_normal(h_B, size * size, 0, 1);
+    generate_normal(h_A, size * size, 1, 0);
+    generate_normal(h_B, size * size, 1, 0);
 
     kukri::array_float2half_host(h_Ah, h_A, size * size);
     kukri::array_float2half_host(h_Bh, h_B, size * size);
@@ -484,7 +484,7 @@ int main(int argc, char *argv[]) {
 
 
     //kukri_float2half2float_test(n_rows_A, n_cols_A);
-    int single_test_size = 128;
+    int single_test_size = 4;
 
     kukri::Timer tmr;
 
