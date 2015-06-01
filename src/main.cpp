@@ -260,7 +260,7 @@ void kukri_mm_test(kukri::half_mm_func_t func, int size, char *test_name = NULL,
         for (int j = 0; j < size; j++) {
             float diff = h_C[j * size + i] - h_C_naive[j * size + i];
             rcd_rerr.update(diff / h_C_naive[j * size + i]);
-            if (en_test && (fabs(diff) > 0.001 * fabs(h_C_naive[j * size + i]))) {
+            if (en_test && (fabs(diff) > 0.05 * fabs(h_C_naive[j * size + i]))) {
                 printf("Test fails: i = %d, j = %d, C[i,j] = %f, C_blas[i,j] = %f\n",
                     i, j, h_C[j * size + i], h_C_naive[j * size + i]);
                 flag = false;
@@ -379,7 +379,7 @@ void kukri_mm_tex_test(kukri::half_mm_tex_func_t func, int size, char *test_name
         for (int j = 0; j < size; j++) {
             float diff = h_C[j * size + i] - h_C_naive[j * size + i];
             rcd_rerr.update(diff / h_C_naive[j * size + i]);
-            if (en_test && (fabs(diff) > 0.01 * fabs(h_C_naive[j * size + i]))) {
+            if (en_test && (fabs(diff) > 0.05 * fabs(h_C_naive[j * size + i]))) {
                 printf("Test fails: i = %d, j = %d, C[i,j] = %f, C_blas[i,j] = %f\n",
                     i, j, h_C[j * size + i], h_C_naive[j * size + i]);
                 flag = false;
@@ -488,7 +488,7 @@ int main(int argc, char *argv[]) {
 
     kukri::Timer tmr;
 
-    bool test = false;
+    bool test = true;
 
     blas_mm_test(single_test_size);
     kukri_mm_test(kukri::half_mm_v01, single_test_size, "Naive Half", test);
