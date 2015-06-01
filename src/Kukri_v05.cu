@@ -98,6 +98,7 @@ __global__ void kukri::_half_mm_v05_kernel(const half *d_A, int ld_A, const half
         if (x < m_limit) {
             for (int y = threadIdx.y; y < k_limit; y += _STRID_Y_V05) {
                 buf_A[IDX2C(x, y, _BOX_V05 + 1)] = __half2float(d_A[IDX2C(x + m_offset, y + k_offset, ld_A)]);
+                //buf_A[IDX2C(x, y, _BOX_V05 + 1)] = y;
                 //buf_A[IDX2C(x, y, _BOX_V05 + 1)] = __half2float(tex2D(tex_A, y + k_offset, x + m_offset));
                 //buf_A[IDX2C(x, y, _BOX_V05 + 1)] = __half2float(tex2D(tex_A, 0, 0));
             }
@@ -106,6 +107,7 @@ __global__ void kukri::_half_mm_v05_kernel(const half *d_A, int ld_A, const half
         if (x < k_limit) {
             for (int y = threadIdx.y; y < n_limit; y += _STRID_Y_V05) {
                 buf_B[IDX2C(x, y, _BOX_V05 + 1)] = __half2float(d_B[IDX2C(x + k_offset, y + n_offset, ld_B)]);
+                //buf_B[IDX2C(x, y, _BOX_V05 + 1)] = y;
                 //buf_B[IDX2C(x, y, _BOX_V05 + 1)] = __half2float(tex2D(tex_B, y + n_offset, x + m_offset));
             }
         }
