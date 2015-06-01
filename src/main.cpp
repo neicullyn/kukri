@@ -298,15 +298,12 @@ void kukri_mm_tex_test(kukri::half_mm_tex_func_t func, kukri::half *h_A, kukri::
     kukri::Timer d2h;
 
     printf("Initiating Kukri...\n");
-    cudaArray *d_A, *d_B;
+    kukri::half *d_A, *d_B;
     kukri::half *d_C;
-
-    cudaChannelFormatDesc channel = cudaCreateChannelDescHalf1();
-    //cudaChannelFormatDesc channel = cudaCreateChannelDesc<float>();
-
+    size_t pitch_A, pitch_B;
     
-    gpuErrChk(cudaMallocArray(&d_A, &channel, K, M, cudaArrayTextureGather));
-    gpuErrChk(cudaMallocArray(&d_B, &channel, N, K, cudaArrayTextureGather));
+    gpuErrChk(cudaMallocPitch(&d_A, &pitch_A, M * sizeof(kukri::half), K));
+    gpuErrChk(cudaMallocPitch(&d_B, &pitch_B, K * sizeof(kukri::half), N));
 
     gpuErrChk(cudaMalloc(&d_C, M * N * sizeof(kukri::half)));
 
@@ -314,10 +311,10 @@ void kukri_mm_tex_test(kukri::half_mm_tex_func_t func, kukri::half *h_A, kukri::
     h2d.tic();
 
 
-    gpuErrChk(cudaMemcpyToArray(d_A, 0, 0, h_A, M * K * sizeof(kukri::half), cudaMemcpyHostToDevice));
-    gpuErrChk(cudaMemcpyToArray(d_B, 0, 0, h_B, K * N * sizeof(kukri::half), cudaMemcpyHostToDevice));
+    gpuErrChk(cudaMemcpy2D(d_A, pitch_A, h_A, M * sizeof(kukri::half), M * sizeof(kukri::half), K, cudaMemcpyHostToDevice));
+    gpuErrChk(cudaMemcpy2D(d_B, pitch_B, h_B, K * sizeof(kukri::half), K * sizeof(kukri::half), N, cudaMemcpyHostToDevice));
 
-    printf("%x  %x\n", d_A, d_B);
+    //printf("%x  %x\n", d_A, d_B);
 
     h2d.toc();
     printf("%f ms\n", h2d.get_val());
@@ -326,7 +323,7 @@ void kukri_mm_tex_test(kukri::half_mm_tex_func_t func, kukri::half *h_A, kukri::
     mm.tic();
     float alpha = 1;
     float beta = 0;
-    func(d_A, d_B, d_C, M, N, K);
+    func(d_A, pitch_A, d_B, pitch_B, d_C, M, N, K);
     gpuErrChk(cudaGetLastError());
     mm.toc();
     printf("%f ms\n", mm.get_val());
@@ -339,8 +336,8 @@ void kukri_mm_tex_test(kukri::half_mm_tex_func_t func, kukri::half *h_A, kukri::
 
     printf("overall: %f ms\n", h2d.get_val() + mm.get_val() + d2h.get_val());
 
-    gpuErrChk(cudaFreeArray(d_A));
-    gpuErrChk(cudaFreeArray(d_B));
+    gpuErrChk(cudaFree(d_A));
+    gpuErrChk(cudaFree(d_B));
     gpuErrChk(cudaFree(d_C));
 }
 
@@ -487,7 +484,7 @@ int main(int argc, char *argv[]) {
 
 
     //kukri_float2half2float_test(n_rows_A, n_cols_A);
-    int single_test_size = 64;
+    int single_test_size = 999;
 
     kukri::Timer tmr;
 

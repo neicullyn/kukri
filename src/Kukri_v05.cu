@@ -11,7 +11,7 @@ texture<half, cudaTextureType2D, cudaReadModeElementType> tex_A;
 texture<half, cudaTextureType2D, cudaReadModeElementType> tex_B;
 
 
-void kukri::half_mm_v05(const cudaArray *d_A, const cudaArray *d_B, half *d_C, int M, int N, int K) {
+void kukri::half_mm_v05(const half *d_A, size_t pitch_A, const half *d_B, size_t pitch_B, half *d_C, int M, int N, int K) {
     dim3 grid_size;
     dim3 block_size;
 
@@ -30,27 +30,27 @@ void kukri::half_mm_v05(const cudaArray *d_A, const cudaArray *d_B, half *d_C, i
 
     cudaChannelFormatDesc channel = cudaCreateChannelDescHalf1();
     
-    tex_A.filterMode = cudaFilterModePoint;
-    tex_A.addressMode[0] = cudaAddressModeBorder;
-    tex_A.addressMode[1] = cudaAddressModeBorder;
-    tex_A.normalized = false;
+    //tex_A.filterMode = cudaFilterModePoint;
+    //tex_A.addressMode[0] = cudaAddressModeBorder;
+    //tex_A.addressMode[1] = cudaAddressModeBorder;
+    //tex_A.normalized = false;
 
-    tex_B.filterMode = cudaFilterModePoint;
-    tex_B.addressMode[0] = cudaAddressModeBorder;
-    tex_B.addressMode[1] = cudaAddressModeBorder;
-    tex_B.normalized = false;
+    //tex_B.filterMode = cudaFilterModePoint;
+    //tex_B.addressMode[0] = cudaAddressModeBorder;
+    //tex_B.addressMode[1] = cudaAddressModeBorder;
+    //tex_B.normalized = false;
 
-    gpuErrChk(cudaBindTextureToArray(&tex_A, d_A, &channel));
-    gpuErrChk(cudaBindTextureToArray(&tex_B, d_B, &channel));
+    //gpuErrChk(cudaBindTextureToArray(&tex_A, d_A, &channel));
+    //gpuErrChk(cudaBindTextureToArray(&tex_B, d_B, &channel));
 
     //printf("%d %d %d | %d %d %d\n", block_size.x, block_size.y, block_size.z, grid_size.x, grid_size.y, grid_size.z);
-    kukri::_half_mm_v05_kernel<<<grid_size, block_size>>>(d_C, M, N, K, n_iter);
+    kukri::_half_mm_v05_kernel<<<grid_size, block_size>>>(d_A, pitch_A / sizeof(kukri::half), d_B, pitch_B / sizeof(kukri::half), d_C, M, N, K, n_iter);
 
     cudaUnbindTexture(&tex_A);
     cudaUnbindTexture(&tex_B);
 }
 
-__global__ void kukri::_half_mm_v05_kernel(half *d_C, int M, int N, int K, int n_iter) {
+__global__ void kukri::_half_mm_v05_kernel(const half *d_A, size_t pitch_A, const half *d_B, size_t pitch_B, half *d_C, int M, int N, int K, int n_iter) {
     __shared__ float buf_A[(_BOX_V05 + 1) * _BOX_V05];
     __shared__ float buf_B[(_BOX_V05 + 1) * _BOX_V05];
 
@@ -82,15 +82,15 @@ __global__ void kukri::_half_mm_v05_kernel(half *d_C, int M, int N, int K, int n
 
         if (x < m_limit) {
             for (int y = threadIdx.y; y < k_limit; y += _STRID_Y_V05) {
-                //buf_A[IDX2C(x, y, _BOX_V05 + 1)] = __half2float(d_A[IDX2C(x + m_offset, y + k_offset, M)]);
-                buf_A[IDX2C(x, y, _BOX_V05 + 1)] = tex2D(tex_A, y + k_offset, x + m_offset);
+                buf_A[IDX2C(x, y, _BOX_V05 + 1)] = __half2float(d_A[IDX2C(x + m_offset, y + k_offset, pitch_A)]);
+                //buf_A[IDX2C(x, y, _BOX_V05 + 1)] = tex2D(tex_A, y + k_offset, x + m_offset);
             }
         }
 
         if (x < k_limit) {
             for (int y = threadIdx.y; y < n_limit; y += _STRID_Y_V05) {
-                //buf_B[IDX2C(x, y, _BOX_V05 + 1)] = __half2float(d_B[IDX2C(x + k_offset, y + n_offset, K)]);
-                buf_B[IDX2C(x, y, _BOX_V05 + 1)] = tex2D(tex_B, y + n_offset, x + m_offset);
+                buf_B[IDX2C(x, y, _BOX_V05 + 1)] = __half2float(d_B[IDX2C(x + k_offset, y + n_offset, pitch_B)]);
+                //buf_B[IDX2C(x, y, _BOX_V05 + 1)] = tex2D(tex_B, y + n_offset, x + m_offset);
             }
         }
 
