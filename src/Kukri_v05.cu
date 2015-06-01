@@ -72,20 +72,13 @@ __global__ void kukri::_half_mm_v05_kernel(const half *d_A, int ld_A, const half
 
     int x = threadIdx.x;
 
-    float val1[_N_LINE_Y_V05];
-    float val2[_N_LINE_Y_V05];
+    float val[_N_LINE_Y_V05];
 
     int yf[_N_LINE_Y_V05];
 
-    float *a1_base;
-    float *a2_base;
-
-    float *b1_base;
-    float *b2_base;
 
     for (int i = 0; i < _N_LINE_Y_V05; i++) {
-        val1[i] = 0;
-        val2[i] = 0;
+        val[i] = 0;
     }
 
     for (int i = 0; i < _N_LINE_Y_V05; i++) {
@@ -126,43 +119,25 @@ __global__ void kukri::_half_mm_v05_kernel(const half *d_A, int ld_A, const half
         __syncthreads();
 
         
-        int k = 0;
-        int l = 1;
-        a1_base = buf_A + IDX2C(x, 0, BUF_A_LD);
-        a2_base = buf_A + IDX2C(x, 1, BUF_A_LD);
-        //Assume _BOX_V05 is a multiple of 2
-        for (; l < _BOX_V05; k += 2, l += 2) {
-            float a1 = *a1_base;
-            float a2 = *a2_base;
-
-            b1_base = buf_B + IDX2C(k, threadIdx.y, BUF_B_LD);
-            b2_base = buf_B + IDX2C(l, threadIdx.y, BUF_B_LD);
+        for (int k = 0; k < _BOX_V05; k ++) {
+            float a = buf_A[IDX2C(x, k, BUF_A_LD)];                       
 
             for (int i = 0; i < _N_LINE_Y_V05; i++) {
 
-                float b1 = *b1_base;
-                float b2 = *b2_base;
-                val1[i] += a1 * b1;
-                val2[i] += a2 * b2;
-
-                b1_base += IDX2C(0, _STRID_Y_V05, BUF_B_LD) - IDX2C(0, 0, BUF_B_LD);
-                b2_base += IDX2C(0, _STRID_Y_V05, BUF_B_LD) - IDX2C(0, 0, BUF_B_LD);
+                float b = buf_B[IDX2C(k, threadIdx.y + i * _STRID_Y_V05, BUF_B_LD)];
+            
+                val[i] += a * b;
             }
-
-            a1_base += IDX2C(0, 2, BUF_A_LD) - IDX2C(0, 0, BUF_A_LD);
-            a2_base += IDX2C(0, 2, BUF_A_LD) - IDX2C(0, 0, BUF_A_LD);
         }
         __syncthreads();
     }
 
 
     if (x < m_limit) {
-        half *c_base = d_C +  IDX2C(x+m_offset, threadIdx.y + n_offset, M);
         for (int i = 0; i < _N_LINE_Y_V05; i++) {
             int y = yf[i];
             if (y < n_limit) {
-                *c_base = __float2half_rn(val1[i] + val2[i]);
-                c_base += M * _STRID_Y_V05;
+                d_C[IDX2C(x+m_offset, threadIdx.y + n_offset, M)] = __float2half_rn(val[i]);
             }
         }
     }
