@@ -64,7 +64,8 @@ __global__ void kukri::_half_mm_v05_kernel(const half *d_A, int ld_A, const half
         int k_offset = _BOX_V05 * i_iter;
         int k_limit = MIN(K - k_offset, _BOX_V05);    
 
-        for (int y = threadIdx.y; y < _BOX_V05; y += _STRID_Y_V05){
+        for (int i = 0; i < _N_LINE_Y_V05; i++){
+            int y = yf[i];
             buf_A[IDX2C(x, y, _BOX_V05 + 1)] = 0;
             buf_B[IDX2C(x, y, _BOX_V05 + 1)] = 0;
         }
