@@ -25,8 +25,6 @@ void kukri::half_mm_v05(const half *d_A, size_t pitch_A, const half *d_B, size_t
 
     int n_iter = (K + _BOX_V05 - 1) / _BOX_V05;
 
-    cudaChannelFormatDesc channel = cudaCreateChannelDescHalf1();
-
     size_t offset_A;
     size_t offset_B;
 
