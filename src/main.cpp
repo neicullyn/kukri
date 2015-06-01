@@ -488,7 +488,7 @@ int main(int argc, char *argv[]) {
 
     kukri::Timer tmr;
 
-    bool test = false;
+    bool test = true;
 
     blas_mm_test(single_test_size);
     kukri_mm_test(kukri::half_mm_v01, single_test_size, "Naive Half", test);
