@@ -31,13 +31,15 @@ void kukri::half_mm_v05(const cudaArray *d_A, const cudaArray *d_B, half *d_C, i
     cudaChannelFormatDesc channel = cudaCreateChannelDescHalf1();
     
     tex_A.filterMode = cudaFilterModePoint;
-    tex_A.addressMode[0] = cudaAddressModeBorder;
-    tex_A.addressMode[1] = cudaAddressModeBorder;
+    tex_A.addressMode[0] = cudaAddressModeClamp;
+    tex_A.addressMode[1] = cudaAddressModeClamp;
+    tex_A.channelDesc = channel;
     tex_A.normalized = false;
 
     tex_B.filterMode = cudaFilterModePoint;
-    tex_B.addressMode[0] = cudaAddressModeBorder;
-    tex_B.addressMode[1] = cudaAddressModeBorder;
+    tex_B.addressMode[0] = cudaAddressModeClamp;
+    tex_B.addressMode[1] = cudaAddressModeClamp;
+    tex_B.channelDesc = channel;
     tex_B.normalized = false;
 
     gpuErrChk(cudaBindTextureToArray(&tex_A, d_A, &channel));
@@ -83,14 +85,14 @@ __global__ void kukri::_half_mm_v05_kernel(half *d_C, int M, int N, int K, int n
         if (x < m_limit) {
             for (int y = threadIdx.y; y < k_limit; y += _STRID_Y_V05) {
                 //buf_A[IDX2C(x, y, _BOX_V05 + 1)] = __half2float(d_A[IDX2C(x + m_offset, y + k_offset, M)]);
-                buf_A[IDX2C(x, y, _BOX_V05 + 1)] = tex2D(tex_A, y + k_offset, x + m_offset);
+                buf_A[IDX2C(x, y, _BOX_V05 + 1)] = __half2float(tex2D(tex_A, 1, 1));
             }
         }
 
         if (x < k_limit) {
             for (int y = threadIdx.y; y < n_limit; y += _STRID_Y_V05) {
                 //buf_B[IDX2C(x, y, _BOX_V05 + 1)] = __half2float(d_B[IDX2C(x + k_offset, y + n_offset, K)]);
-                buf_B[IDX2C(x, y, _BOX_V05 + 1)] = tex2D(tex_B, y + n_offset, x + m_offset);
+                buf_B[IDX2C(x, y, _BOX_V05 + 1)] = __half2float(tex2D(tex_B, x + m_offset, y + n_offset));
             }
         }
 
@@ -119,7 +121,8 @@ __global__ void kukri::_half_mm_v05_kernel(half *d_C, int M, int N, int K, int n
         for (int i = 0; i < _N_LINE_Y_V05; i++) {
             int y = yf[i];
             if (y < n_limit) {
-                d_C[IDX2C(x+m_offset, y+n_offset, M)] = __float2half_rn(val[i]);
+                //d_C[IDX2C(x+m_offset, y+n_offset, M)] = __float2half_rn(val[i]);
+                d_C[IDX2C(x+m_offset, y+n_offset, M)] = __float2half_rn(buf_A[IDX2C(x, y, _BOX_V05 + 1)]);
             }
         }
     }
