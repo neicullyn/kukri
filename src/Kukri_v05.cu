@@ -92,7 +92,6 @@ __global__ void kukri::_half_mm_v05_kernel(const half *d_A, int ld_A, const half
                 int y = yf[i];
                 float b = buf_B[IDX2C(k, y, _BOX_V05 + 1)];
                 val[i] += a * b;
-
             }
         }
         __syncthreads();
