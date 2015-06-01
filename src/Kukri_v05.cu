@@ -2,6 +2,7 @@
 
 using namespace kukri;
 #define _BOX_V05 64
+#define _LEN_K_V05 64
 #define _BLOCK_SIZE_X_V05 64
 #define _BLOCK_SIZE_Y_V05 8
 #define _STRID_Y_V05 _BLOCK_SIZE_Y_V05
