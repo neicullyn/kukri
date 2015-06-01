@@ -58,8 +58,11 @@ void kukri::half_mm_v05(const half *d_A, size_t pitch_A, const half *d_B, size_t
 }
 
 __global__ void kukri::_half_mm_v05_kernel(const half *d_A, int ld_A, const half *d_B, int ld_B, half *d_C, int M, int N, int K, int n_iter) {
-    __shared__ float buf_A[(_BOX_V05 + 1) * _BOX_V05];
-    __shared__ float buf_B[(_BOX_V05 + 1) * _BOX_V05];
+#define BUF_A_LD (_BOX_V05 + 1)
+#define BUF_B_LD (_BOX_V05 + 1)
+
+    __shared__ float buf_A[BUF_A_LD * _BOX_V05];
+    __shared__ float buf_B[BUF_B_LD * _BOX_V05];
 
     int m_offset = _BOX_V05 * blockIdx.x;
     int n_offset = _BOX_V05 * blockIdx.y;
@@ -91,13 +94,22 @@ __global__ void kukri::_half_mm_v05_kernel(const half *d_A, int ld_A, const half
 
     for (int i_iter = 0; i_iter < n_iter; i_iter++) {
         // Loading the block into shared memory
+        
 
         int k_offset = _BOX_V05 * i_iter;
         int k_limit = MIN(K - k_offset, _BOX_V05);        
 
+
+        // Set to zero
+
+        for (int y = threadIdx.y; y < _BOX_V05; y += _STRID_Y_V05) {
+            buf_A[IDX2C(x, y, BUF_A_LD)] = 0;
+            buf_B[IDX2C(x, y, BUF_B_LD)] = 0;
+        }
+
         if (x < m_limit) {
             for (int y = threadIdx.y; y < k_limit; y += _STRID_Y_V05) {
-                buf_A[IDX2C(x, y, _BOX_V05 + 1)] = __half2float(d_A[IDX2C(x + m_offset, y + k_offset, ld_A)]);
+                buf_A[IDX2C(x, y, BUF_A_LD)] = __half2float(d_A[IDX2C(x + m_offset, y + k_offset, ld_A)]);
                 //buf_A[IDX2C(x, y, _BOX_V05 + 1)] = y;
                 //buf_A[IDX2C(x, y, _BOX_V05 + 1)] = __half2float(tex2D(tex_A, y + k_offset, x + m_offset));
                 //buf_A[IDX2C(x, y, _BOX_V05 + 1)] = __half2float(tex2D(tex_A, 0, 0));
@@ -106,7 +118,7 @@ __global__ void kukri::_half_mm_v05_kernel(const half *d_A, int ld_A, const half
 
         if (x < k_limit) {
             for (int y = threadIdx.y; y < n_limit; y += _STRID_Y_V05) {
-                buf_B[IDX2C(x, y, _BOX_V05 + 1)] = __half2float(d_B[IDX2C(x + k_offset, y + n_offset, ld_B)]);
+                buf_B[IDX2C(x, y, BUF_B_LD)] = __half2float(d_B[IDX2C(x + k_offset, y + n_offset, ld_B)]);
                 //buf_B[IDX2C(x, y, _BOX_V05 + 1)] = y;
                 //buf_B[IDX2C(x, y, _BOX_V05 + 1)] = __half2float(tex2D(tex_B, y + n_offset, x + m_offset));
             }
@@ -114,50 +126,33 @@ __global__ void kukri::_half_mm_v05_kernel(const half *d_A, int ld_A, const half
 
         __syncthreads();
 
-        if (x < m_limit) {
-            int k = 0;
-            int l = 1;
-            a1_base = buf_A + IDX2C(x, 0, _BOX_V05 + 1);
-            a2_base = buf_A + IDX2C(x, 1, _BOX_V05 + 1);
-            for (; l < k_limit; k += 2, l +=2) {
-                float a1 = *a1_base;
-                float a2 = *a2_base;
+        
+        int k = 0;
+        int l = 1;
+        a1_base = buf_A + IDX2C(x, 0, BUF_A_LD);
+        a2_base = buf_A + IDX2C(x, 1, BUF_A_LD);
+        //Assume _BOX_V05 is a multiple of 2
+        for (; l < _BOX_V05; k += 2, l += 2) {
+            float a1 = *a1_base;
+            float a2 = *a2_base;
 
-                b1_base = buf_B + IDX2C(k, threadIdx.y, _BOX_V05 + 1);
-                b2_base = buf_B + IDX2C(l, threadIdx.y, _BOX_V05 + 1);
+            b1_base = buf_B + IDX2C(k, threadIdx.y, BUF_B_LD);
+            b2_base = buf_B + IDX2C(l, threadIdx.y, BUF_B_LD);
 
-                for (int i = 0; i < _N_LINE_Y_V05; i++) {
-                    int y = yf[i];                    
+            for (int i = 0; i < _N_LINE_Y_V05; i++) {
+                int y = yf[i];
+                float b1 = *b1_base;
+                float b2 = *b2_base;
+                val1[i] += a1 * b1;
+                val2[i] += a2 * b2;
 
-                    if (y < n_limit) {                    
-                        float b1 = *b1_base;
-                        float b2 = *b2_base;
-                        val1[i] += a1 * b1;
-                        val2[i] += a2 * b2;
-
-                        b1_base += IDX2C(0, _STRID_Y_V05, _BOX_V05 + 1) - IDX2C(0, 0, _BOX_V05 + 1);
-                        b2_base += IDX2C(0, _STRID_Y_V05, _BOX_V05 + 1) - IDX2C(0, 0, _BOX_V05 + 1);
-
-                    }
-                }
-
-                a1_base += IDX2C(0, 2, _BOX_V05 + 1) - IDX2C(0, 0, _BOX_V05 + 1);
-                a2_base += IDX2C(0, 2, _BOX_V05 + 1) - IDX2C(0, 0, _BOX_V05 + 1);
+                b1_base += IDX2C(0, _STRID_Y_V05, BUF_B_LD) - IDX2C(0, 0, BUF_B_LD);
+                b2_base += IDX2C(0, _STRID_Y_V05, BUF_B_LD) - IDX2C(0, 0, BUF_B_LD);
             }
-            if (k < k_limit) {
-                float a1 = *a1_base;
 
-                for (int i = 0; i < _N_LINE_Y_V05; i++) {
-                    int y = yf[i];
-
-                    if (y < n_limit) {
-                        float b1 = buf_B[IDX2C(k, y, _BOX_V05 + 1)];
-                        val1[i] += a1 * b1;
-                    }
-                }
-            }
-        }        
-
+            a1_base += IDX2C(0, 2, BUF_A_LD) - IDX2C(0, 0, BUF_A_LD);
+            a2_base += IDX2C(0, 2, BUF_A_LD) - IDX2C(0, 0, BUF_A_LD);
+        }
         __syncthreads();
     }
 
@@ -172,5 +167,7 @@ __global__ void kukri::_half_mm_v05_kernel(const half *d_A, int ld_A, const half
             }
         }
     }
+#undef BUF_A_LD
+#undef BUF_B_LD
 
 }
