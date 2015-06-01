@@ -56,17 +56,19 @@ __global__ void kukri::_half_mm_v05_kernel(const half *d_A, int ld_A, const half
         yf[i] = threadIdx.y + i * _STRID_Y_V05;
     }
 
-    for (int i_iter = 0; i_iter < n_iter; i_iter++) {
+    for (int i = 0; i < _N_LINE_Y_V05; i++){
+        int y = yf[i];
+        buf_A[IDX2C(x, y, _BOX_V05 + 1)] = 0;
+        buf_B[IDX2C(x, y, _BOX_V05 + 1)] = 0;
+    }
+
+    for (int i_iter = n_iter - 1; i_iter >= 0; i_iter--) {
         // Loading the block into shared memory
 
         int k_offset = _BOX_V05 * i_iter;
         int k_limit = MIN(K - k_offset, _BOX_V05);    
 
-        for (int i = 0; i < _N_LINE_Y_V05; i++){
-            int y = yf[i];
-            buf_A[IDX2C(x, y, _BOX_V05 + 1)] = 0;
-            buf_B[IDX2C(x, y, _BOX_V05 + 1)] = 0;
-        }
+
 
         if (x < m_limit) {
             for (int y = threadIdx.y; y < k_limit; y += _STRID_Y_V05) {
