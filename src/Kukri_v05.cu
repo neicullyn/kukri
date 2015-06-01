@@ -77,6 +77,8 @@ __global__ void kukri::_half_mm_v05_kernel(const half *d_A, int ld_A, const half
     float *a1_base;
     float *a2_base;
 
+    float *b1_base;
+    float *b2_base;
 
     for (int i = 0; i < _N_LINE_Y_V05; i++) {
         val1[i] = 0;
@@ -113,23 +115,35 @@ __global__ void kukri::_half_mm_v05_kernel(const half *d_A, int ld_A, const half
         if (x < m_limit) {
             int k = 0;
             int l = 1;
+            a1_base = buf_A + IDX2C(x, 0, _BOX_V05 + 1);
+            a2_base = buf_A + IDX2C(x, 1, _BOX_V05 + 1);
             for (; l < k_limit; k += 2, l +=2) {
-                float a1 = buf_A[IDX2C(x, k, _BOX_V05 + 1)];               
-                float a2 = buf_A[IDX2C(x, l, _BOX_V05 + 1)];
+                float a1 = *a1_base;
+                float a2 = *a2_base;
+
+                b1_base = buf_B + IDX2C(k, threadIdx.y, _BOX_V05 + 1);
+                b2_base = buf_B + IDX2C(l, threadIdx.y, _BOX_V05 + 1);
 
                 for (int i = 0; i < _N_LINE_Y_V05; i++) {
                     int y = yf[i];                    
 
                     if (y < n_limit) {                    
-                        float b1 = buf_B[IDX2C(k, y, _BOX_V05 + 1)];
-                        float b2 = buf_B[IDX2C(l, y, _BOX_V05 + 1)];
+                        float b1 = *b1_base;
+                        float b2 = *b2_base;
                         val1[i] += a1 * b1;
                         val2[i] += a2 * b2;
+
+                        b1_base += IDX2C(0, _STRID_Y_V05, _BOX_V05 + 1) - IDX2C(0, 0, _BOX_V05 + 1);
+                        b2_base += IDX2C(0, _STRID_Y_V05, _BOX_V05 + 1) - IDX2C(0, 0, _BOX_V05 + 1);
+
                     }
                 }
+
+                a1_base += IDX2C(0, 2, _BOX_V05 + 1) - IDX2C(0, 0, _BOX_V05 + 1);
+                a2_base += IDX2C(0, 2, _BOX_V05 + 1) - IDX2C(0, 0, _BOX_V05 + 1);
             }
             if (k < k_limit) {
-                float a1 = buf_A[IDX2C(x, k, _BOX_V05 + 1)];
+                float a1 = *a1_base;
 
                 for (int i = 0; i < _N_LINE_Y_V05; i++) {
                     int y = yf[i];
@@ -147,11 +161,12 @@ __global__ void kukri::_half_mm_v05_kernel(const half *d_A, int ld_A, const half
 
 
     if (x < m_limit) {
+        half *c_base = d_C +  IDX2C(x+m_offset, threadIdx.y + n_offset, M);
         for (int i = 0; i < _N_LINE_Y_V05; i++) {
             int y = yf[i];
             if (y < n_limit) {
-                d_C[IDX2C(x+m_offset, y+n_offset, M)] = __float2half_rn(val1[i] + val2[i]);
-                //d_C[IDX2C(x+m_offset, y+n_offset, M)] = __float2half_rn(buf_A[x]);
+                *c_base = __float2half_rn(val1[i] + val2[i]);
+                c_base += M * _STRID_Y_V05;
             }
         }
     }
