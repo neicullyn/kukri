@@ -2,13 +2,13 @@
 
 using namespace kukri;
 #define _BOX_V05 64
-#define _BLOCK_SIZE_X_V05 64
+#define _BLOCK_SIZE_X_V05 _BOX_V05
 #define _BLOCK_SIZE_Y_V05 8
 #define _STRID_Y_V05 _BLOCK_SIZE_Y_V05
 #define _N_LINE_Y_V05 ((_BOX_V05 + _BLOCK_SIZE_Y_V05 - 1) / _BLOCK_SIZE_Y_V05)
 
-texture<half, cudaTextureType2D, cudaReadModeElementType> tex_A;
-texture<half, cudaTextureType2D, cudaReadModeElementType> tex_B;
+//texture<half, cudaTextureType2D, cudaReadModeElementType> tex_A;
+//texture<half, cudaTextureType2D, cudaReadModeElementType> tex_B;
 
 
 void kukri::half_mm_v05(const half *d_A, size_t pitch_A, const half *d_B, size_t pitch_B, half *d_C, int M, int N, int K) {
