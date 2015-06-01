@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <cublas_v2.h>
+#include <cuda_texture_types.h>
 
 #include "helpers.h"
 
@@ -26,7 +27,8 @@ namespace kukri{
     void array_float2half_device(half *d_dst, float *d_src, size_t size);
     __global__ void _array_float2half_kernel(half *d_dst, float *d_src, size_t size);
 
-    typedef void (*half_mm_func_t)(const half *d_A, const half *d_B, half    *d_C, int M, int N, int K);
+    typedef void (*half_mm_func_t)(const half *d_A, const half *d_B, half *d_C, int M, int N, int K);
+    typedef void(*half_mm_tex_func_t)(const cudaArray *d_A, const cudaArray *d_B, half *d_C, int M, int N, int K);
 
     void half_mm_v01(const half *d_A, const half *d_B, half *d_C, int M, int N, int K);
     __global__ void _half_mm_v01_kernel(const half *d_A, const half *d_B, half *d_C, int M, int N, int K);
@@ -39,6 +41,9 @@ namespace kukri{
 
     void half_mm_v04(const half *d_A, const half *d_B, half *d_C, int M, int N, int K);
     __global__ void _half_mm_v04_kernel(const half *d_A, const half *d_B, half *d_C, int M, int N, int K, int n_iter);
+
+    void half_mm_v05(const cudaArray *d_A, const cudaArray *d_B, half *d_C, int M, int N, int K);
+    __global__ void _half_mm_v05_kernel(half *d_C, int M, int N, int K, int n_iter);
 
     inline __device__ float _half_mul_2float(half a, half b) {
         float af, bf;

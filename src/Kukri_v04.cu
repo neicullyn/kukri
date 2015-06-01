@@ -42,7 +42,7 @@ __global__ void kukri::_half_mm_v04_kernel(const half *d_A, const half *d_B, hal
 
     float val[_N_LINE_Y_V04];
     int yf[_N_LINE_Y_V04];
-    int yo[_N_LINE_Y_V04];
+    //int yo[_N_LINE_Y_V04];
 
     for (int i = 0; i < _N_LINE_Y_V04; i++) {
         val[i] = 0;
@@ -52,9 +52,9 @@ __global__ void kukri::_half_mm_v04_kernel(const half *d_A, const half *d_B, hal
         yf[i] = threadIdx.y + i * _STRID_Y_V04;
     }
 
-    for (int i = 0; i < _N_LINE_Y_V04; i++) {
-        yo[i] = threadIdx.y * _BOX_V04 + i * _STRID_Y_V04 * _BOX_V04;
-    }
+    //for (int i = 0; i < _N_LINE_Y_V04; i++) {
+    //    yo[i] = threadIdx.y * _BOX_V04 + i * _STRID_Y_V04 * _BOX_V04;
+    //}
 
     for (int i_iter = 0; i_iter < n_iter; i_iter++) {
         // Loading the block into shared memory
