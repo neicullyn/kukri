@@ -68,26 +68,17 @@ __global__ void kukri::_half_mm_v05_kernel(const half *d_A, int ld_A, const half
         int k_offset = _BOX_V05 * i_iter;
         int k_limit = MIN(K - k_offset, _BOX_V05);    
 
-        // Assume m_limit and k_limit are multiples of 2
-        if (x < _BOX_V05 / 2) {        
-            if (2 * x < m_limit) {                
-                for (int y = threadIdx.y; y < k_limit; y += _STRID_Y_V05) {
-                    unsigned int temp = *((unsigned int *)&d_A[IDX2C(x * 2 + m_offset, y + k_offset, ld_A)]);
-                    half l = (temp & 0xffff0000) >> 16;
-                    half r = (temp & 0x0000ffff);
-                    buf_A[IDX2C(2 * x, y, _BOX_V05 + 1)] = __half2float(l);
-                    buf_A[IDX2C(2 * x + 1, y, _BOX_V05 + 1)] = __half2float(r);
-                }
-            }
 
-            if (2 * x < k_limit) {
-                for (int y = threadIdx.y; y < n_limit; y += _STRID_Y_V05) {
-                    unsigned int temp = *((unsigned int *)&d_B[IDX2C(x * 2 + k_offset, y + n_offset, ld_B)]);
-                    half l = (temp & 0xffff0000) >> 16;
-                    half r = (temp & 0x0000ffff);
-                    buf_B[IDX2C(2 * x, y, _BOX_V05 + 1)] = __half2float(l);
-                    buf_B[IDX2C(2 * x + 1, y, _BOX_V05 + 1)] = __half2float(r);
-                }
+
+        if (x < m_limit) {
+            for (int y = threadIdx.y; y < k_limit; y += _STRID_Y_V05) {
+                buf_A[IDX2C(x, y, _BOX_V05 + 1)] = __half2float(d_A[IDX2C(x + m_offset, y + k_offset, ld_A)]);
+            }
+        }
+
+        if (x < k_limit) {
+            for (int y = threadIdx.y; y < n_limit; y += _STRID_Y_V05) {
+                buf_B[IDX2C(x, y, _BOX_V05 + 1)] = __half2float(d_B[IDX2C(x + k_offset, y + n_offset, ld_B)]);
             }
         }
 
