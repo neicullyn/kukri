@@ -43,7 +43,7 @@ namespace kukri{
     __global__ void _half_mm_v04_kernel(const half *d_A, const half *d_B, half *d_C, int M, int N, int K, int n_iter);
 
     void half_mm_v05(const half *d_A, size_t pitch_A, const half *d_B, size_t pitch_B, half *d_C, int M, int N, int K);
-    __global__ void _half_mm_v05_kernel(const half *d_A, size_t pitch_A, const half *d_B, size_t pitch_B, half *d_C, int M, int N, int K, int n_iter);
+    __global__ void _half_mm_v05_kernel(const half *d_A, int ld_A, const half *d_B, int ld_B, half *d_C, int M, int N, int K, int n_iter);
 
     inline __device__ float _half_mul_2float(half a, half b) {
         float af, bf;

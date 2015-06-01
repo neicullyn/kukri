@@ -484,7 +484,7 @@ int main(int argc, char *argv[]) {
 
 
     //kukri_float2half2float_test(n_rows_A, n_cols_A);
-    int single_test_size = 999;
+    int single_test_size = 128;
 
     kukri::Timer tmr;
 
