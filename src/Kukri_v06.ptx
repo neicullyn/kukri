@@ -26,471 +26,552 @@
 	.param .u32 _ZN5kukri19_half_mm_v06_kernelEPKtiS1_iPtiiii_param_8
 )
 {
-	.reg .pred 	%p<5>;
-	.reg .s16 	%rs<41>;
-	.reg .f32 	%f<115>;
-	.reg .s32 	%r<76>;
-	.reg .s64 	%rd<45>;
+	.reg .pred 	%p<14>;
+	.reg .s16 	%rs<33>;
+	.reg .f32 	%f<107>;
+	.reg .s32 	%r<144>;
+	.reg .s64 	%rd<75>;
 	// demoted variable
 	.shared .align 4 .b8 _ZN5kukri19_half_mm_v06_kernelEPKtiS1_iPtiiii$__cuda_local_var_227157_34_non_const_buf_A[16640];
 	// demoted variable
 	.shared .align 4 .b8 _ZN5kukri19_half_mm_v06_kernelEPKtiS1_iPtiiii$__cuda_local_var_227158_34_non_const_buf_B[16640];
 
-	ld.param.u64 	%rd1, [_ZN5kukri19_half_mm_v06_kernelEPKtiS1_iPtiiii_param_0];
-	ld.param.u32 	%r7, [_ZN5kukri19_half_mm_v06_kernelEPKtiS1_iPtiiii_param_1];
-	ld.param.u64 	%rd2, [_ZN5kukri19_half_mm_v06_kernelEPKtiS1_iPtiiii_param_4];
-	ld.param.u32 	%r8, [_ZN5kukri19_half_mm_v06_kernelEPKtiS1_iPtiiii_param_5];
-	ld.param.u32 	%r9, [_ZN5kukri19_half_mm_v06_kernelEPKtiS1_iPtiiii_param_8];
-	mov.f32 	%f114, 0f00000000;
-	mov.f32 	%f113, %f114;
-	mov.f32 	%f112, %f114;
-	mov.f32 	%f111, %f114;
-	mov.f32 	%f110, %f114;
-	mov.f32 	%f109, %f114;
-	mov.f32 	%f108, %f114;
-	mov.f32 	%f107, %f114;
-	setp.lt.s32	%p1, %r9, 1;
-	@%p1 bra 	BB0_7;
+	ld.param.u64 	%rd2, [_ZN5kukri19_half_mm_v06_kernelEPKtiS1_iPtiiii_param_0];
+	ld.param.u32 	%r40, [_ZN5kukri19_half_mm_v06_kernelEPKtiS1_iPtiiii_param_1];
+	ld.param.u64 	%rd3, [_ZN5kukri19_half_mm_v06_kernelEPKtiS1_iPtiiii_param_4];
+	ld.param.u32 	%r41, [_ZN5kukri19_half_mm_v06_kernelEPKtiS1_iPtiiii_param_5];
+	ld.param.u32 	%r42, [_ZN5kukri19_half_mm_v06_kernelEPKtiS1_iPtiiii_param_8];
+	mov.f32 	%f106, 0f00000000;
+	mov.f32 	%f105, %f106;
+	mov.f32 	%f104, %f106;
+	mov.f32 	%f103, %f106;
+	mov.f32 	%f102, %f106;
+	mov.f32 	%f101, %f106;
+	mov.f32 	%f100, %f106;
+	mov.f32 	%f99, %f106;
+	setp.lt.s32	%p2, %r42, 1;
+	@%p2 bra 	BB0_31;
 
-	mov.u32 	%r11, %tid.y;
-	mul.lo.s32 	%r1, %r11, 65;
-	mov.u32 	%r74, 0;
-	mov.f32 	%f114, 0f00000000;
-	mov.f32 	%f113, %f114;
-	mov.f32 	%f112, %f114;
-	mov.f32 	%f111, %f114;
-	mov.f32 	%f110, %f114;
-	mov.f32 	%f109, %f114;
-	mov.f32 	%f108, %f114;
-	mov.f32 	%f107, %f114;
-	cvta.to.global.u64 	%rd3, %rd1;
+	mov.u32 	%r44, %tid.x;
+	mov.u32 	%r45, %tid.y;
+	mad.lo.s32 	%r46, %r45, 65, %r44;
+	mul.wide.s32 	%rd4, %r46, 4;
+	mov.u64 	%rd5, _ZN5kukri19_half_mm_v06_kernelEPKtiS1_iPtiiii$__cuda_local_var_227157_34_non_const_buf_A;
+	add.s64 	%rd1, %rd5, %rd4;
+	mov.u32 	%r134, 0;
+	mov.f32 	%f106, 0f00000000;
+	mov.f32 	%f105, %f106;
+	mov.f32 	%f104, %f106;
+	mov.f32 	%f103, %f106;
+	mov.f32 	%f102, %f106;
+	mov.f32 	%f101, %f106;
+	mov.f32 	%f100, %f106;
+	mov.f32 	%f99, %f106;
+	cvta.to.global.u64 	%rd6, %rd2;
 
 BB0_2:
-	mov.u32 	%r12, %tid.x;
-	setp.gt.s32	%p2, %r12, 31;
-	@%p2 bra 	BB0_4;
+	setp.gt.s32	%p3, %r44, 31;
+	@%p3 bra 	BB0_4;
 
-	shl.b32 	%r13, %r74, 6;
-	shl.b32 	%r15, %r12, 1;
-	add.s32 	%r16, %r13, %r15;
-	add.s32 	%r18, %r11, %r13;
-	mov.u32 	%r19, %ctaid.x;
-	shl.b32 	%r20, %r19, 6;
-	add.s32 	%r21, %r15, %r20;
-	mad.lo.s32 	%r22, %r18, %r7, %r21;
-	mul.wide.s32 	%rd4, %r22, 2;
-	add.s64 	%rd5, %rd3, %rd4;
-	ld.global.u32 	%r23, [%rd5];
-	cvt.u16.u32	%rs1, %r23;
-	{
-	.reg .b16 %temp;
-	mov.b16 	%temp, %rs1;
-	cvt.f32.f16 	%f49, %temp;
-	}
-	mad.lo.s32 	%r24, %r11, 65, %r15;
-	mul.wide.s32 	%rd6, %r24, 4;
-	mov.u64 	%rd7, _ZN5kukri19_half_mm_v06_kernelEPKtiS1_iPtiiii$__cuda_local_var_227157_34_non_const_buf_A;
-	add.s64 	%rd8, %rd7, %rd6;
-	st.shared.f32 	[%rd8], %f49;
-	shr.u32 	%r25, %r23, 16;
-	cvt.u16.u32	%rs2, %r25;
+	shl.b32 	%r48, %r134, 6;
+	shl.b32 	%r50, %r44, 1;
+	add.s32 	%r51, %r48, %r50;
+	add.s32 	%r53, %r45, %r48;
+	mov.u32 	%r54, %ctaid.x;
+	shl.b32 	%r55, %r54, 6;
+	add.s32 	%r56, %r50, %r55;
+	mad.lo.s32 	%r57, %r53, %r40, %r56;
+	mul.wide.s32 	%rd7, %r57, 2;
+	add.s64 	%rd8, %rd6, %rd7;
+	ld.global.u32 	%r58, [%rd8];
+	mad.lo.s32 	%r59, %r45, 65, %r50;
+	mul.wide.s32 	%rd9, %r59, 4;
+	add.s64 	%rd11, %rd5, %rd9;
+	st.shared.u32 	[%rd11], %r58;
+	st.shared.u32 	[%rd11+4], %r58;
+	mov.u32 	%r60, %ctaid.y;
+	shl.b32 	%r61, %r60, 6;
+	add.s32 	%r62, %r45, %r61;
+	mad.lo.s32 	%r63, %r62, %r40, %r51;
+	mul.wide.s32 	%rd12, %r63, 2;
+	add.s64 	%rd13, %rd6, %rd12;
+	ld.global.u32 	%r64, [%rd13];
+	mov.u64 	%rd14, _ZN5kukri19_half_mm_v06_kernelEPKtiS1_iPtiiii$__cuda_local_var_227158_34_non_const_buf_B;
+	add.s64 	%rd15, %rd14, %rd9;
+	st.shared.u32 	[%rd15], %r64;
+	st.shared.u32 	[%rd15+4], %r64;
+	shl.b32 	%r65, %r40, 3;
+	mul.wide.s32 	%rd16, %r65, 2;
+	add.s64 	%rd17, %rd8, %rd16;
+	ld.global.u32 	%r66, [%rd17];
+	st.shared.u32 	[%rd11+2080], %r66;
+	st.shared.u32 	[%rd11+2084], %r66;
+	add.s64 	%rd18, %rd13, %rd16;
+	ld.global.u32 	%r67, [%rd18];
+	st.shared.u32 	[%rd15+2080], %r67;
+	st.shared.u32 	[%rd15+2084], %r67;
+	add.s64 	%rd19, %rd17, %rd16;
+	ld.global.u32 	%r68, [%rd19];
+	st.shared.u32 	[%rd11+4160], %r68;
+	st.shared.u32 	[%rd11+4164], %r68;
+	add.s64 	%rd20, %rd18, %rd16;
+	ld.global.u32 	%r69, [%rd20];
+	st.shared.u32 	[%rd15+4160], %r69;
+	st.shared.u32 	[%rd15+4164], %r69;
+	add.s64 	%rd21, %rd19, %rd16;
+	ld.global.u32 	%r70, [%rd21];
+	st.shared.u32 	[%rd11+6240], %r70;
+	st.shared.u32 	[%rd11+6244], %r70;
+	add.s64 	%rd22, %rd20, %rd16;
+	ld.global.u32 	%r71, [%rd22];
+	st.shared.u32 	[%rd15+6240], %r71;
+	st.shared.u32 	[%rd15+6244], %r71;
+	add.s64 	%rd23, %rd21, %rd16;
+	ld.global.u32 	%r72, [%rd23];
+	st.shared.u32 	[%rd11+8320], %r72;
+	st.shared.u32 	[%rd11+8324], %r72;
+	add.s64 	%rd24, %rd22, %rd16;
+	ld.global.u32 	%r73, [%rd24];
+	st.shared.u32 	[%rd15+8320], %r73;
+	st.shared.u32 	[%rd15+8324], %r73;
+	add.s64 	%rd25, %rd23, %rd16;
+	ld.global.u32 	%r74, [%rd25];
+	st.shared.u32 	[%rd11+10400], %r74;
+	st.shared.u32 	[%rd11+10404], %r74;
+	add.s64 	%rd26, %rd24, %rd16;
+	ld.global.u32 	%r75, [%rd26];
+	st.shared.u32 	[%rd15+10400], %r75;
+	st.shared.u32 	[%rd15+10404], %r75;
+	add.s64 	%rd27, %rd25, %rd16;
+	ld.global.u32 	%r76, [%rd27];
+	st.shared.u32 	[%rd11+12480], %r76;
+	st.shared.u32 	[%rd11+12484], %r76;
+	add.s64 	%rd28, %rd26, %rd16;
+	ld.global.u32 	%r77, [%rd28];
+	st.shared.u32 	[%rd15+12480], %r77;
+	st.shared.u32 	[%rd15+12484], %r77;
+	add.s64 	%rd29, %rd27, %rd16;
+	ld.global.u32 	%r78, [%rd29];
+	st.shared.u32 	[%rd11+14560], %r78;
+	st.shared.u32 	[%rd11+14564], %r78;
+	add.s64 	%rd30, %rd28, %rd16;
+	ld.global.u32 	%r79, [%rd30];
+	st.shared.u32 	[%rd15+14560], %r79;
+	st.shared.u32 	[%rd15+14564], %r79;
+
+BB0_4:
+	and.b32  	%r80, %r44, 1;
+	setp.eq.b32	%p4, %r80, 1;
+	not.pred 	%p1, %p4;
+	bar.sync 	0;
+	ld.shared.u32 	%r3, [%rd1];
+	mov.u64 	%rd32, _ZN5kukri19_half_mm_v06_kernelEPKtiS1_iPtiiii$__cuda_local_var_227158_34_non_const_buf_B;
+	add.s64 	%rd33, %rd32, %rd4;
+	ld.shared.u32 	%r135, [%rd33];
+	@%p1 bra 	BB0_6;
+	bra.uni 	BB0_5;
+
+BB0_6:
+	cvt.u16.u32	%rs2, %r3;
 	{
 	.reg .b16 %temp;
 	mov.b16 	%temp, %rs2;
 	cvt.f32.f16 	%f50, %temp;
 	}
-	st.shared.f32 	[%rd8+4], %f50;
-	mov.u32 	%r26, %ctaid.y;
-	shl.b32 	%r27, %r26, 6;
-	add.s32 	%r28, %r11, %r27;
-	mad.lo.s32 	%r29, %r28, %r7, %r16;
-	mul.wide.s32 	%rd9, %r29, 2;
-	add.s64 	%rd10, %rd3, %rd9;
-	ld.global.u32 	%r30, [%rd10];
-	cvt.u16.u32	%rs3, %r30;
+	st.shared.f32 	[%rd1], %f50;
+	bra.uni 	BB0_7;
+
+BB0_5:
+	shr.u32 	%r83, %r3, 16;
+	cvt.u16.u32	%rs1, %r83;
+	{
+	.reg .b16 %temp;
+	mov.b16 	%temp, %rs1;
+	cvt.f32.f16 	%f49, %temp;
+	}
+	st.shared.f32 	[%rd1], %f49;
+	shr.u32 	%r135, %r135, 16;
+
+BB0_7:
+	setp.eq.b32	%p5, %r80, 1;
+	cvt.u16.u32	%rs3, %r135;
 	{
 	.reg .b16 %temp;
 	mov.b16 	%temp, %rs3;
 	cvt.f32.f16 	%f51, %temp;
 	}
-	mov.u64 	%rd11, _ZN5kukri19_half_mm_v06_kernelEPKtiS1_iPtiiii$__cuda_local_var_227158_34_non_const_buf_B;
-	add.s64 	%rd12, %rd11, %rd6;
-	st.shared.f32 	[%rd12], %f51;
-	shr.u32 	%r31, %r30, 16;
-	cvt.u16.u32	%rs4, %r31;
-	{
-	.reg .b16 %temp;
-	mov.b16 	%temp, %rs4;
-	cvt.f32.f16 	%f52, %temp;
-	}
-	st.shared.f32 	[%rd12+4], %f52;
-	shl.b32 	%r32, %r7, 3;
-	mul.wide.s32 	%rd13, %r32, 2;
-	add.s64 	%rd14, %rd5, %rd13;
-	ld.global.u32 	%r33, [%rd14];
-	cvt.u16.u32	%rs5, %r33;
+	st.shared.f32 	[%rd33], %f51;
+	ld.shared.u32 	%r7, [%rd1+2080];
+	ld.shared.u32 	%r136, [%rd33+2080];
+	@!%p5 bra 	BB0_9;
+	bra.uni 	BB0_8;
+
+BB0_9:
+	cvt.u16.u32	%rs5, %r7;
 	{
 	.reg .b16 %temp;
 	mov.b16 	%temp, %rs5;
 	cvt.f32.f16 	%f53, %temp;
 	}
-	st.shared.f32 	[%rd8+2080], %f53;
-	shr.u32 	%r34, %r33, 16;
-	cvt.u16.u32	%rs6, %r34;
+	st.shared.f32 	[%rd1+2080], %f53;
+	bra.uni 	BB0_10;
+
+BB0_8:
+	shr.u32 	%r88, %r7, 16;
+	cvt.u16.u32	%rs4, %r88;
+	{
+	.reg .b16 %temp;
+	mov.b16 	%temp, %rs4;
+	cvt.f32.f16 	%f52, %temp;
+	}
+	st.shared.f32 	[%rd1+2080], %f52;
+	shr.u32 	%r136, %r136, 16;
+
+BB0_10:
+	setp.eq.b32	%p6, %r80, 1;
+	cvt.u16.u32	%rs6, %r136;
 	{
 	.reg .b16 %temp;
 	mov.b16 	%temp, %rs6;
 	cvt.f32.f16 	%f54, %temp;
 	}
-	st.shared.f32 	[%rd8+2084], %f54;
-	add.s64 	%rd15, %rd10, %rd13;
-	ld.global.u32 	%r35, [%rd15];
-	cvt.u16.u32	%rs7, %r35;
-	{
-	.reg .b16 %temp;
-	mov.b16 	%temp, %rs7;
-	cvt.f32.f16 	%f55, %temp;
-	}
-	st.shared.f32 	[%rd12+2080], %f55;
-	shr.u32 	%r36, %r35, 16;
-	cvt.u16.u32	%rs8, %r36;
+	st.shared.f32 	[%rd33+2080], %f54;
+	ld.shared.u32 	%r11, [%rd1+4160];
+	ld.shared.u32 	%r137, [%rd33+4160];
+	@!%p6 bra 	BB0_12;
+	bra.uni 	BB0_11;
+
+BB0_12:
+	cvt.u16.u32	%rs8, %r11;
 	{
 	.reg .b16 %temp;
 	mov.b16 	%temp, %rs8;
 	cvt.f32.f16 	%f56, %temp;
 	}
-	st.shared.f32 	[%rd12+2084], %f56;
-	add.s64 	%rd16, %rd14, %rd13;
-	ld.global.u32 	%r37, [%rd16];
-	cvt.u16.u32	%rs9, %r37;
+	st.shared.f32 	[%rd1+4160], %f56;
+	bra.uni 	BB0_13;
+
+BB0_11:
+	shr.u32 	%r93, %r11, 16;
+	cvt.u16.u32	%rs7, %r93;
+	{
+	.reg .b16 %temp;
+	mov.b16 	%temp, %rs7;
+	cvt.f32.f16 	%f55, %temp;
+	}
+	st.shared.f32 	[%rd1+4160], %f55;
+	shr.u32 	%r137, %r137, 16;
+
+BB0_13:
+	setp.eq.b32	%p7, %r80, 1;
+	cvt.u16.u32	%rs9, %r137;
 	{
 	.reg .b16 %temp;
 	mov.b16 	%temp, %rs9;
 	cvt.f32.f16 	%f57, %temp;
 	}
-	st.shared.f32 	[%rd8+4160], %f57;
-	shr.u32 	%r38, %r37, 16;
-	cvt.u16.u32	%rs10, %r38;
-	{
-	.reg .b16 %temp;
-	mov.b16 	%temp, %rs10;
-	cvt.f32.f16 	%f58, %temp;
-	}
-	st.shared.f32 	[%rd8+4164], %f58;
-	add.s64 	%rd17, %rd15, %rd13;
-	ld.global.u32 	%r39, [%rd17];
-	cvt.u16.u32	%rs11, %r39;
+	st.shared.f32 	[%rd33+4160], %f57;
+	ld.shared.u32 	%r15, [%rd1+6240];
+	ld.shared.u32 	%r138, [%rd33+6240];
+	@!%p7 bra 	BB0_15;
+	bra.uni 	BB0_14;
+
+BB0_15:
+	cvt.u16.u32	%rs11, %r15;
 	{
 	.reg .b16 %temp;
 	mov.b16 	%temp, %rs11;
 	cvt.f32.f16 	%f59, %temp;
 	}
-	st.shared.f32 	[%rd12+4160], %f59;
-	shr.u32 	%r40, %r39, 16;
-	cvt.u16.u32	%rs12, %r40;
+	st.shared.f32 	[%rd1+6240], %f59;
+	bra.uni 	BB0_16;
+
+BB0_14:
+	shr.u32 	%r98, %r15, 16;
+	cvt.u16.u32	%rs10, %r98;
+	{
+	.reg .b16 %temp;
+	mov.b16 	%temp, %rs10;
+	cvt.f32.f16 	%f58, %temp;
+	}
+	st.shared.f32 	[%rd1+6240], %f58;
+	shr.u32 	%r138, %r138, 16;
+
+BB0_16:
+	setp.eq.b32	%p8, %r80, 1;
+	cvt.u16.u32	%rs12, %r138;
 	{
 	.reg .b16 %temp;
 	mov.b16 	%temp, %rs12;
 	cvt.f32.f16 	%f60, %temp;
 	}
-	st.shared.f32 	[%rd12+4164], %f60;
-	add.s64 	%rd18, %rd16, %rd13;
-	ld.global.u32 	%r41, [%rd18];
-	cvt.u16.u32	%rs13, %r41;
-	{
-	.reg .b16 %temp;
-	mov.b16 	%temp, %rs13;
-	cvt.f32.f16 	%f61, %temp;
-	}
-	st.shared.f32 	[%rd8+6240], %f61;
-	shr.u32 	%r42, %r41, 16;
-	cvt.u16.u32	%rs14, %r42;
+	st.shared.f32 	[%rd33+6240], %f60;
+	ld.shared.u32 	%r19, [%rd1+8320];
+	ld.shared.u32 	%r139, [%rd33+8320];
+	@!%p8 bra 	BB0_18;
+	bra.uni 	BB0_17;
+
+BB0_18:
+	cvt.u16.u32	%rs14, %r19;
 	{
 	.reg .b16 %temp;
 	mov.b16 	%temp, %rs14;
 	cvt.f32.f16 	%f62, %temp;
 	}
-	st.shared.f32 	[%rd8+6244], %f62;
-	add.s64 	%rd19, %rd17, %rd13;
-	ld.global.u32 	%r43, [%rd19];
-	cvt.u16.u32	%rs15, %r43;
+	st.shared.f32 	[%rd1+8320], %f62;
+	bra.uni 	BB0_19;
+
+BB0_17:
+	shr.u32 	%r103, %r19, 16;
+	cvt.u16.u32	%rs13, %r103;
+	{
+	.reg .b16 %temp;
+	mov.b16 	%temp, %rs13;
+	cvt.f32.f16 	%f61, %temp;
+	}
+	st.shared.f32 	[%rd1+8320], %f61;
+	shr.u32 	%r139, %r139, 16;
+
+BB0_19:
+	setp.eq.b32	%p9, %r80, 1;
+	cvt.u16.u32	%rs15, %r139;
 	{
 	.reg .b16 %temp;
 	mov.b16 	%temp, %rs15;
 	cvt.f32.f16 	%f63, %temp;
 	}
-	st.shared.f32 	[%rd12+6240], %f63;
-	shr.u32 	%r44, %r43, 16;
-	cvt.u16.u32	%rs16, %r44;
-	{
-	.reg .b16 %temp;
-	mov.b16 	%temp, %rs16;
-	cvt.f32.f16 	%f64, %temp;
-	}
-	st.shared.f32 	[%rd12+6244], %f64;
-	add.s64 	%rd20, %rd18, %rd13;
-	ld.global.u32 	%r45, [%rd20];
-	cvt.u16.u32	%rs17, %r45;
+	st.shared.f32 	[%rd33+8320], %f63;
+	ld.shared.u32 	%r23, [%rd1+10400];
+	ld.shared.u32 	%r140, [%rd33+10400];
+	@!%p9 bra 	BB0_21;
+	bra.uni 	BB0_20;
+
+BB0_21:
+	cvt.u16.u32	%rs17, %r23;
 	{
 	.reg .b16 %temp;
 	mov.b16 	%temp, %rs17;
 	cvt.f32.f16 	%f65, %temp;
 	}
-	st.shared.f32 	[%rd8+8320], %f65;
-	shr.u32 	%r46, %r45, 16;
-	cvt.u16.u32	%rs18, %r46;
+	st.shared.f32 	[%rd1+10400], %f65;
+	bra.uni 	BB0_22;
+
+BB0_20:
+	shr.u32 	%r108, %r23, 16;
+	cvt.u16.u32	%rs16, %r108;
+	{
+	.reg .b16 %temp;
+	mov.b16 	%temp, %rs16;
+	cvt.f32.f16 	%f64, %temp;
+	}
+	st.shared.f32 	[%rd1+10400], %f64;
+	shr.u32 	%r140, %r140, 16;
+
+BB0_22:
+	setp.eq.b32	%p10, %r80, 1;
+	cvt.u16.u32	%rs18, %r140;
 	{
 	.reg .b16 %temp;
 	mov.b16 	%temp, %rs18;
 	cvt.f32.f16 	%f66, %temp;
 	}
-	st.shared.f32 	[%rd8+8324], %f66;
-	add.s64 	%rd21, %rd19, %rd13;
-	ld.global.u32 	%r47, [%rd21];
-	cvt.u16.u32	%rs19, %r47;
-	{
-	.reg .b16 %temp;
-	mov.b16 	%temp, %rs19;
-	cvt.f32.f16 	%f67, %temp;
-	}
-	st.shared.f32 	[%rd12+8320], %f67;
-	shr.u32 	%r48, %r47, 16;
-	cvt.u16.u32	%rs20, %r48;
+	st.shared.f32 	[%rd33+10400], %f66;
+	ld.shared.u32 	%r27, [%rd1+12480];
+	ld.shared.u32 	%r141, [%rd33+12480];
+	@!%p10 bra 	BB0_24;
+	bra.uni 	BB0_23;
+
+BB0_24:
+	cvt.u16.u32	%rs20, %r27;
 	{
 	.reg .b16 %temp;
 	mov.b16 	%temp, %rs20;
 	cvt.f32.f16 	%f68, %temp;
 	}
-	st.shared.f32 	[%rd12+8324], %f68;
-	add.s64 	%rd22, %rd20, %rd13;
-	ld.global.u32 	%r49, [%rd22];
-	cvt.u16.u32	%rs21, %r49;
+	st.shared.f32 	[%rd1+12480], %f68;
+	bra.uni 	BB0_25;
+
+BB0_23:
+	shr.u32 	%r113, %r27, 16;
+	cvt.u16.u32	%rs19, %r113;
+	{
+	.reg .b16 %temp;
+	mov.b16 	%temp, %rs19;
+	cvt.f32.f16 	%f67, %temp;
+	}
+	st.shared.f32 	[%rd1+12480], %f67;
+	shr.u32 	%r141, %r141, 16;
+
+BB0_25:
+	setp.eq.b32	%p11, %r80, 1;
+	cvt.u16.u32	%rs21, %r141;
 	{
 	.reg .b16 %temp;
 	mov.b16 	%temp, %rs21;
 	cvt.f32.f16 	%f69, %temp;
 	}
-	st.shared.f32 	[%rd8+10400], %f69;
-	shr.u32 	%r50, %r49, 16;
-	cvt.u16.u32	%rs22, %r50;
-	{
-	.reg .b16 %temp;
-	mov.b16 	%temp, %rs22;
-	cvt.f32.f16 	%f70, %temp;
-	}
-	st.shared.f32 	[%rd8+10404], %f70;
-	add.s64 	%rd23, %rd21, %rd13;
-	ld.global.u32 	%r51, [%rd23];
-	cvt.u16.u32	%rs23, %r51;
+	st.shared.f32 	[%rd33+12480], %f69;
+	ld.shared.u32 	%r31, [%rd1+14560];
+	ld.shared.u32 	%r142, [%rd33+14560];
+	@!%p11 bra 	BB0_27;
+	bra.uni 	BB0_26;
+
+BB0_27:
+	cvt.u16.u32	%rs23, %r31;
 	{
 	.reg .b16 %temp;
 	mov.b16 	%temp, %rs23;
 	cvt.f32.f16 	%f71, %temp;
 	}
-	st.shared.f32 	[%rd12+10400], %f71;
-	shr.u32 	%r52, %r51, 16;
-	cvt.u16.u32	%rs24, %r52;
+	st.shared.f32 	[%rd1+14560], %f71;
+	bra.uni 	BB0_28;
+
+BB0_26:
+	shr.u32 	%r118, %r31, 16;
+	cvt.u16.u32	%rs22, %r118;
+	{
+	.reg .b16 %temp;
+	mov.b16 	%temp, %rs22;
+	cvt.f32.f16 	%f70, %temp;
+	}
+	st.shared.f32 	[%rd1+14560], %f70;
+	shr.u32 	%r142, %r142, 16;
+
+BB0_28:
+	cvt.u16.u32	%rs24, %r142;
 	{
 	.reg .b16 %temp;
 	mov.b16 	%temp, %rs24;
 	cvt.f32.f16 	%f72, %temp;
 	}
-	st.shared.f32 	[%rd12+10404], %f72;
-	add.s64 	%rd24, %rd22, %rd13;
-	ld.global.u32 	%r53, [%rd24];
-	cvt.u16.u32	%rs25, %r53;
-	{
-	.reg .b16 %temp;
-	mov.b16 	%temp, %rs25;
-	cvt.f32.f16 	%f73, %temp;
-	}
-	st.shared.f32 	[%rd8+12480], %f73;
-	shr.u32 	%r54, %r53, 16;
-	cvt.u16.u32	%rs26, %r54;
-	{
-	.reg .b16 %temp;
-	mov.b16 	%temp, %rs26;
-	cvt.f32.f16 	%f74, %temp;
-	}
-	st.shared.f32 	[%rd8+12484], %f74;
-	add.s64 	%rd25, %rd23, %rd13;
-	ld.global.u32 	%r55, [%rd25];
-	cvt.u16.u32	%rs27, %r55;
-	{
-	.reg .b16 %temp;
-	mov.b16 	%temp, %rs27;
-	cvt.f32.f16 	%f75, %temp;
-	}
-	st.shared.f32 	[%rd12+12480], %f75;
-	shr.u32 	%r56, %r55, 16;
-	cvt.u16.u32	%rs28, %r56;
-	{
-	.reg .b16 %temp;
-	mov.b16 	%temp, %rs28;
-	cvt.f32.f16 	%f76, %temp;
-	}
-	st.shared.f32 	[%rd12+12484], %f76;
-	add.s64 	%rd26, %rd24, %rd13;
-	ld.global.u32 	%r57, [%rd26];
-	cvt.u16.u32	%rs29, %r57;
-	{
-	.reg .b16 %temp;
-	mov.b16 	%temp, %rs29;
-	cvt.f32.f16 	%f77, %temp;
-	}
-	st.shared.f32 	[%rd8+14560], %f77;
-	shr.u32 	%r58, %r57, 16;
-	cvt.u16.u32	%rs30, %r58;
-	{
-	.reg .b16 %temp;
-	mov.b16 	%temp, %rs30;
-	cvt.f32.f16 	%f78, %temp;
-	}
-	st.shared.f32 	[%rd8+14564], %f78;
-	add.s64 	%rd27, %rd25, %rd13;
-	ld.global.u32 	%r59, [%rd27];
-	cvt.u16.u32	%rs31, %r59;
-	{
-	.reg .b16 %temp;
-	mov.b16 	%temp, %rs31;
-	cvt.f32.f16 	%f79, %temp;
-	}
-	st.shared.f32 	[%rd12+14560], %f79;
-	shr.u32 	%r60, %r59, 16;
-	cvt.u16.u32	%rs32, %r60;
-	{
-	.reg .b16 %temp;
-	mov.b16 	%temp, %rs32;
-	cvt.f32.f16 	%f80, %temp;
-	}
-	st.shared.f32 	[%rd12+14564], %f80;
-
-BB0_4:
+	mul.lo.s32 	%r35, %r45, 65;
+	add.s32 	%r120, %r35, %r44;
+	mul.wide.s32 	%rd55, %r120, 4;
+	add.s64 	%rd57, %rd32, %rd55;
+	st.shared.f32 	[%rd57+14560], %f72;
 	bar.sync 	0;
-	mov.u32 	%r75, 0;
+	mov.u32 	%r143, 0;
 
-BB0_5:
-	mad.lo.s32 	%r62, %r75, 65, %r12;
-	mul.wide.s32 	%rd28, %r62, 4;
-	mov.u64 	%rd29, _ZN5kukri19_half_mm_v06_kernelEPKtiS1_iPtiiii$__cuda_local_var_227157_34_non_const_buf_A;
-	add.s64 	%rd30, %rd29, %rd28;
-	add.s32 	%r63, %r1, %r75;
-	mul.wide.s32 	%rd31, %r63, 4;
-	mov.u64 	%rd32, _ZN5kukri19_half_mm_v06_kernelEPKtiS1_iPtiiii$__cuda_local_var_227158_34_non_const_buf_B;
-	add.s64 	%rd33, %rd32, %rd31;
-	ld.shared.f32 	%f81, [%rd33];
-	ld.shared.f32 	%f82, [%rd30];
-	fma.rn.f32 	%f83, %f82, %f81, %f114;
-	ld.shared.f32 	%f84, [%rd33+2080];
-	fma.rn.f32 	%f85, %f82, %f84, %f113;
-	ld.shared.f32 	%f86, [%rd33+4160];
-	fma.rn.f32 	%f87, %f82, %f86, %f112;
-	ld.shared.f32 	%f88, [%rd33+6240];
-	fma.rn.f32 	%f89, %f82, %f88, %f111;
-	ld.shared.f32 	%f90, [%rd33+8320];
-	fma.rn.f32 	%f91, %f82, %f90, %f110;
-	ld.shared.f32 	%f92, [%rd33+10400];
-	fma.rn.f32 	%f93, %f82, %f92, %f109;
-	ld.shared.f32 	%f94, [%rd33+12480];
-	fma.rn.f32 	%f95, %f82, %f94, %f108;
-	ld.shared.f32 	%f96, [%rd33+14560];
-	fma.rn.f32 	%f97, %f82, %f96, %f107;
-	ld.shared.f32 	%f98, [%rd33+4];
-	ld.shared.f32 	%f99, [%rd30+260];
-	fma.rn.f32 	%f114, %f99, %f98, %f83;
-	ld.shared.f32 	%f100, [%rd33+2084];
-	fma.rn.f32 	%f113, %f99, %f100, %f85;
-	ld.shared.f32 	%f101, [%rd33+4164];
-	fma.rn.f32 	%f112, %f99, %f101, %f87;
-	ld.shared.f32 	%f102, [%rd33+6244];
-	fma.rn.f32 	%f111, %f99, %f102, %f89;
-	ld.shared.f32 	%f103, [%rd33+8324];
-	fma.rn.f32 	%f110, %f99, %f103, %f91;
-	ld.shared.f32 	%f104, [%rd33+10404];
-	fma.rn.f32 	%f109, %f99, %f104, %f93;
-	ld.shared.f32 	%f105, [%rd33+12484];
-	fma.rn.f32 	%f108, %f99, %f105, %f95;
-	ld.shared.f32 	%f106, [%rd33+14564];
-	fma.rn.f32 	%f107, %f99, %f106, %f97;
-	add.s32 	%r75, %r75, 2;
-	setp.ne.s32	%p3, %r75, 64;
-	@%p3 bra 	BB0_5;
+BB0_29:
+	mad.lo.s32 	%r122, %r143, 65, %r44;
+	mul.wide.s32 	%rd58, %r122, 4;
+	add.s64 	%rd60, %rd5, %rd58;
+	add.s32 	%r123, %r35, %r143;
+	mul.wide.s32 	%rd61, %r123, 4;
+	add.s64 	%rd63, %rd32, %rd61;
+	ld.shared.f32 	%f73, [%rd63];
+	ld.shared.f32 	%f74, [%rd60];
+	fma.rn.f32 	%f75, %f74, %f73, %f106;
+	ld.shared.f32 	%f76, [%rd63+2080];
+	fma.rn.f32 	%f77, %f74, %f76, %f105;
+	ld.shared.f32 	%f78, [%rd63+4160];
+	fma.rn.f32 	%f79, %f74, %f78, %f104;
+	ld.shared.f32 	%f80, [%rd63+6240];
+	fma.rn.f32 	%f81, %f74, %f80, %f103;
+	ld.shared.f32 	%f82, [%rd63+8320];
+	fma.rn.f32 	%f83, %f74, %f82, %f102;
+	ld.shared.f32 	%f84, [%rd63+10400];
+	fma.rn.f32 	%f85, %f74, %f84, %f101;
+	ld.shared.f32 	%f86, [%rd63+12480];
+	fma.rn.f32 	%f87, %f74, %f86, %f100;
+	ld.shared.f32 	%f88, [%rd63+14560];
+	fma.rn.f32 	%f89, %f74, %f88, %f99;
+	ld.shared.f32 	%f90, [%rd63+4];
+	ld.shared.f32 	%f91, [%rd60+260];
+	fma.rn.f32 	%f106, %f91, %f90, %f75;
+	ld.shared.f32 	%f92, [%rd63+2084];
+	fma.rn.f32 	%f105, %f91, %f92, %f77;
+	ld.shared.f32 	%f93, [%rd63+4164];
+	fma.rn.f32 	%f104, %f91, %f93, %f79;
+	ld.shared.f32 	%f94, [%rd63+6244];
+	fma.rn.f32 	%f103, %f91, %f94, %f81;
+	ld.shared.f32 	%f95, [%rd63+8324];
+	fma.rn.f32 	%f102, %f91, %f95, %f83;
+	ld.shared.f32 	%f96, [%rd63+10404];
+	fma.rn.f32 	%f101, %f91, %f96, %f85;
+	ld.shared.f32 	%f97, [%rd63+12484];
+	fma.rn.f32 	%f100, %f91, %f97, %f87;
+	ld.shared.f32 	%f98, [%rd63+14564];
+	fma.rn.f32 	%f99, %f91, %f98, %f89;
+	add.s32 	%r143, %r143, 2;
+	setp.ne.s32	%p12, %r143, 64;
+	@%p12 bra 	BB0_29;
 
 	bar.sync 	0;
-	add.s32 	%r74, %r74, 1;
-	setp.lt.s32	%p4, %r74, %r9;
-	@%p4 bra 	BB0_2;
+	add.s32 	%r134, %r134, 1;
+	setp.lt.s32	%p13, %r134, %r42;
+	@%p13 bra 	BB0_2;
 
-BB0_7:
-	mov.u32 	%r64, %ctaid.x;
-	shl.b32 	%r65, %r64, 6;
-	mov.u32 	%r66, %tid.x;
-	add.s32 	%r67, %r66, %r65;
-	mov.u32 	%r68, %ctaid.y;
-	shl.b32 	%r69, %r68, 6;
-	mov.u32 	%r70, %tid.y;
-	add.s32 	%r71, %r70, %r69;
-	mad.lo.s32 	%r72, %r71, %r8, %r67;
-	cvta.to.global.u64 	%rd34, %rd2;
-	mul.wide.s32 	%rd35, %r72, 2;
-	add.s64 	%rd36, %rd34, %rd35;
+BB0_31:
+	mov.u32 	%r124, %ctaid.x;
+	shl.b32 	%r125, %r124, 6;
+	mov.u32 	%r126, %tid.x;
+	add.s32 	%r127, %r126, %r125;
+	mov.u32 	%r128, %ctaid.y;
+	shl.b32 	%r129, %r128, 6;
+	mov.u32 	%r130, %tid.y;
+	add.s32 	%r131, %r130, %r129;
+	mad.lo.s32 	%r132, %r131, %r41, %r127;
+	cvta.to.global.u64 	%rd64, %rd3;
+	mul.wide.s32 	%rd65, %r132, 2;
+	add.s64 	%rd66, %rd64, %rd65;
 	{
 	.reg .b16 %temp;
-	cvt.rn.f16.f32 	%temp, %f114;
-	mov.b16 	%rs33, %temp;
+	cvt.rn.f16.f32 	%temp, %f106;
+	mov.b16 	%rs25, %temp;
 }
-	st.global.u16 	[%rd36], %rs33;
-	shl.b32 	%r73, %r8, 3;
-	mul.wide.s32 	%rd37, %r73, 2;
-	add.s64 	%rd38, %rd36, %rd37;
+	st.global.u16 	[%rd66], %rs25;
+	shl.b32 	%r133, %r41, 3;
+	mul.wide.s32 	%rd67, %r133, 2;
+	add.s64 	%rd68, %rd66, %rd67;
 	{
 	.reg .b16 %temp;
-	cvt.rn.f16.f32 	%temp, %f113;
-	mov.b16 	%rs34, %temp;
+	cvt.rn.f16.f32 	%temp, %f105;
+	mov.b16 	%rs26, %temp;
 }
-	st.global.u16 	[%rd38], %rs34;
-	add.s64 	%rd39, %rd38, %rd37;
+	st.global.u16 	[%rd68], %rs26;
+	add.s64 	%rd69, %rd68, %rd67;
 	{
 	.reg .b16 %temp;
-	cvt.rn.f16.f32 	%temp, %f112;
-	mov.b16 	%rs35, %temp;
+	cvt.rn.f16.f32 	%temp, %f104;
+	mov.b16 	%rs27, %temp;
 }
-	st.global.u16 	[%rd39], %rs35;
-	add.s64 	%rd40, %rd39, %rd37;
+	st.global.u16 	[%rd69], %rs27;
+	add.s64 	%rd70, %rd69, %rd67;
 	{
 	.reg .b16 %temp;
-	cvt.rn.f16.f32 	%temp, %f111;
-	mov.b16 	%rs36, %temp;
+	cvt.rn.f16.f32 	%temp, %f103;
+	mov.b16 	%rs28, %temp;
 }
-	st.global.u16 	[%rd40], %rs36;
-	add.s64 	%rd41, %rd40, %rd37;
+	st.global.u16 	[%rd70], %rs28;
+	add.s64 	%rd71, %rd70, %rd67;
 	{
 	.reg .b16 %temp;
-	cvt.rn.f16.f32 	%temp, %f110;
-	mov.b16 	%rs37, %temp;
+	cvt.rn.f16.f32 	%temp, %f102;
+	mov.b16 	%rs29, %temp;
 }
-	st.global.u16 	[%rd41], %rs37;
-	add.s64 	%rd42, %rd41, %rd37;
+	st.global.u16 	[%rd71], %rs29;
+	add.s64 	%rd72, %rd71, %rd67;
 	{
 	.reg .b16 %temp;
-	cvt.rn.f16.f32 	%temp, %f109;
-	mov.b16 	%rs38, %temp;
+	cvt.rn.f16.f32 	%temp, %f101;
+	mov.b16 	%rs30, %temp;
 }
-	st.global.u16 	[%rd42], %rs38;
-	add.s64 	%rd43, %rd42, %rd37;
+	st.global.u16 	[%rd72], %rs30;
+	add.s64 	%rd73, %rd72, %rd67;
 	{
 	.reg .b16 %temp;
-	cvt.rn.f16.f32 	%temp, %f108;
-	mov.b16 	%rs39, %temp;
+	cvt.rn.f16.f32 	%temp, %f100;
+	mov.b16 	%rs31, %temp;
 }
-	st.global.u16 	[%rd43], %rs39;
-	add.s64 	%rd44, %rd43, %rd37;
+	st.global.u16 	[%rd73], %rs31;
+	add.s64 	%rd74, %rd73, %rd67;
 	{
 	.reg .b16 %temp;
-	cvt.rn.f16.f32 	%temp, %f107;
-	mov.b16 	%rs40, %temp;
+	cvt.rn.f16.f32 	%temp, %f99;
+	mov.b16 	%rs32, %temp;
 }
-	st.global.u16 	[%rd44], %rs40;
+	st.global.u16 	[%rd74], %rs32;
 	ret;
 }
 
