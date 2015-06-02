@@ -65,10 +65,25 @@ __global__ void kukri::_half_mm_v06_kernel(const half *d_A, int ld_A, const half
         int k_offset = _BOX_V06 * i_iter;
 
 
-        for (int i = 0; i < _N_LINE_Y_V06; i++) {
-            int y = yf[i];
-            buf_A[IDX2C(x, y, _BOX_V06 + 1)] = __half2float(d_A[IDX2C(x + m_offset, y + k_offset, ld_A)]);
-            buf_B[IDX2C(x, y, _BOX_V06 + 1)] = __half2float(d_B[IDX2C(x + k_offset, y + n_offset, ld_B)]);
+        if (x < _BOX_V06 / 2){
+            for (int i = 0; i < _N_LINE_Y_V06; i++) {
+                int y = yf[i];
+                union {
+                    unsigned int n32;
+                    half t[2];
+                } temp1, temp2;
+
+                temp1.n32 = *((unsigned int *)&d_A[IDX2C(2 * x + m_offset, y + k_offset, ld_A)]);
+                buf_A[IDX2C(2 * x, y, _BOX_V06 + 1)] = __half2float(temp1.t[0]);
+                buf_A[IDX2C(2 * x + 1, y, _BOX_V06 + 1)] = __half2float(temp1.t[1]);
+
+                temp2.n32 = *((unsigned int *)&d_A[IDX2C(2 * x + k_offset, y + n_offset, ld_A)]);
+                buf_B[IDX2C(2 * x, y, _BOX_V06 + 1)] = __half2float(temp2.t[0]);
+                buf_B[IDX2C(2 * x + 1, y, _BOX_V06 + 1)] = __half2float(temp2.t[1]);
+
+                //buf_A[IDX2C(x, y, _BOX_V06 + 1)] = __half2float(d_A[IDX2C(x + m_offset, y + k_offset, ld_A)]);
+                //buf_B[IDX2C(x, y, _BOX_V06 + 1)] = __half2float(d_B[IDX2C(x + k_offset, y + n_offset, ld_B)]);
+            }
         }
 
         __syncthreads();
