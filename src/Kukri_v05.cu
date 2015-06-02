@@ -25,9 +25,6 @@ void kukri::half_mm_v05(const half *d_A, size_t pitch_A, const half *d_B, size_t
 
     int n_iter = (K + _BOX_V05 - 1) / _BOX_V05;
 
-    size_t offset_A;
-    size_t offset_B;
-
     kukri::_half_mm_v05_kernel<<<grid_size, block_size>>>(d_A, pitch_A / sizeof(kukri::half), d_B, pitch_B / sizeof(kukri::half), d_C, M, N, K, n_iter);
 
 }

@@ -301,15 +301,24 @@ void kukri_mm_tex_test(kukri::half_mm_tex_func_t func, kukri::half *h_A, kukri::
     kukri::half *d_A, *d_B;
     kukri::half *d_C;
     size_t pitch_A, pitch_B;
-   
-    gpuErrChk(cudaMallocPitch(&d_A, &pitch_A, M * sizeof(kukri::half), K));
-    gpuErrChk(cudaMallocPitch(&d_B, &pitch_B, K * sizeof(kukri::half), N));
 
-    gpuErrChk(cudaMalloc(&d_C, M * N * sizeof(kukri::half)));
+
+#define _BOX_V06 64
+
+    int aM = (M + _BOX_V06 -1) / _BOX_V06 * _BOX_V06;
+    int aN = (N + _BOX_V06 -1) / _BOX_V06 * _BOX_V06;
+    int aK = (K + _BOX_V06 -1) / _BOX_V06 * _BOX_V06;
+
+    gpuErrChk(cudaMallocPitch(&d_A, &pitch_A, aM * sizeof(kukri::half), aK));
+    gpuErrChk(cudaMallocPitch(&d_B, &pitch_B, aK * sizeof(kukri::half), aN));
+
+    gpuErrChk(cudaMalloc(&d_C, aM * aN * sizeof(kukri::half)));
 
     printf("h2d...");
     h2d.tic();
 
+    gpuErrChk(cudaMemset2D(d_A, pitch_A, 0, aM * sizeof(kukri::half), aK));
+    gpuErrChk(cudaMemset2D(d_B, pitch_B, 0, aK * sizeof(kukri::half), aN));
 
     gpuErrChk(cudaMemcpy2D(d_A, pitch_A, h_A, M * sizeof(kukri::half), M * sizeof(kukri::half), K, cudaMemcpyHostToDevice));
     gpuErrChk(cudaMemcpy2D(d_B, pitch_B, h_B, K * sizeof(kukri::half), K * sizeof(kukri::half), N, cudaMemcpyHostToDevice));
@@ -323,14 +332,15 @@ void kukri_mm_tex_test(kukri::half_mm_tex_func_t func, kukri::half *h_A, kukri::
     mm.tic();
     float alpha = 1;
     float beta = 0;
-    func(d_A, pitch_A, d_B, pitch_B, d_C, M, N, K);
+    func(d_A, pitch_A, d_B, pitch_B, d_C, aM, aN, aK);
     gpuErrChk(cudaGetLastError());
     mm.toc();
     printf("%f ms\n", mm.get_val());
 
     printf("d2h...");
     d2h.tic();
-    gpuErrChk(cudaMemcpy(h_C, d_C, M * N * sizeof(kukri::half), cudaMemcpyDeviceToHost));
+    //gpuErrChk(cudaMemcpy(h_C, d_C, M * N * sizeof(kukri::half), cudaMemcpyDeviceToHost));
+    cudaMemcpy2D(h_C, M * sizeof(kukri::half), d_C, aM * sizeof(kukri::half), M * sizeof(kukri::half), N, cudaMemcpyDeviceToHost);
     d2h.toc();
     printf("%f ms\n", d2h.get_val());
 
@@ -484,18 +494,19 @@ int main(int argc, char *argv[]) {
 
 
     //kukri_float2half2float_test(n_rows_A, n_cols_A);
-    int single_test_size = 1000;
+    int single_test_size = 8000;
 
     kukri::Timer tmr;
 
-    bool test = true;
+    bool test = false;
 
     blas_mm_test(single_test_size);
     kukri_mm_test(kukri::half_mm_v01, single_test_size, "Naive Half", test);
     kukri_mm_test(kukri::half_mm_v02, single_test_size, "Shared Memory", test);
     kukri_mm_test(kukri::half_mm_v03, single_test_size, "Improved Shared Memory", test);
     kukri_mm_test(kukri::half_mm_v04, single_test_size, "Coalasced", test);
-    kukri_mm_tex_test(kukri::half_mm_v05, single_test_size, "Texture", test);
+    kukri_mm_tex_test(kukri::half_mm_v05, single_test_size, "Less Branch", test);
+    kukri_mm_tex_test(kukri::half_mm_v06, single_test_size, "No Branch", test);
 
     //mm_test(n_rows_A, n_cols_A, n_rows_B, n_cols_B);
 
