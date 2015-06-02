@@ -303,7 +303,7 @@ void kukri_mm_tex_test(kukri::half_mm_tex_func_t func, kukri::half *h_A, kukri::
     size_t pitch_A, pitch_B;
 
 
-#define _BOX_V06 64
+#define _BOX_V06 128
 
     int aM = (M + _BOX_V06 -1) / _BOX_V06 * _BOX_V06;
     int aN = (N + _BOX_V06 -1) / _BOX_V06 * _BOX_V06;
@@ -494,7 +494,7 @@ int main(int argc, char *argv[]) {
 
 
     //kukri_float2half2float_test(n_rows_A, n_cols_A);
-    int single_test_size = 8000;
+    int single_test_size = 2000;
 
     kukri::Timer tmr;
 
@@ -505,7 +505,7 @@ int main(int argc, char *argv[]) {
     kukri_mm_test(kukri::half_mm_v02, single_test_size, "Shared Memory", test);
     kukri_mm_test(kukri::half_mm_v03, single_test_size, "Improved Shared Memory", test);
     kukri_mm_test(kukri::half_mm_v04, single_test_size, "Coalasced", test);
-    kukri_mm_tex_test(kukri::half_mm_v05, single_test_size, "Less Branch", test);
+    //kukri_mm_tex_test(kukri::half_mm_v05, single_test_size, "Less Branch", test);
     kukri_mm_tex_test(kukri::half_mm_v06, single_test_size, "No Branch", test);
 
     //mm_test(n_rows_A, n_cols_A, n_rows_B, n_cols_B);

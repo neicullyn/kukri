@@ -1,9 +1,12 @@
 #include "Kukri.cuh"
 
 using namespace kukri;
-#define _BOX_V06 64
-#define _BLOCK_SIZE_X_V06 64
-#define _BLOCK_SIZE_Y_V06 8
+#define _BOX_V06 128
+#define _BLOCK_SIZE_X_V06 128
+#define _BLOCK_SIZE_Y_V06 4
+
+#define _K_LEN 32
+
 #define _STRID_Y_V06 _BLOCK_SIZE_Y_V06
 #define _N_LINE_Y_V06 ((_BOX_V06 + _BLOCK_SIZE_Y_V06 - 1) / _BLOCK_SIZE_Y_V06)
 
@@ -23,7 +26,7 @@ void kukri::half_mm_v06(const half *d_A, size_t pitch_A, const half *d_B, size_t
     grid_size.y = (N + _BOX_V06 - 1) / _BOX_V06;
     grid_size.z = 1;
 
-    int n_iter = (K + _BOX_V06 - 1) / _BOX_V06;
+    int n_iter = (K + _K_LEN - 1) / _K_LEN;
 
     //printf("%d %d %d\n", M, N, K);
     if (!((M % _BOX_V06 == 0) && (N % _BOX_V06 == 0) && (K % _BOX_V06 == 0))) {
@@ -35,11 +38,12 @@ void kukri::half_mm_v06(const half *d_A, size_t pitch_A, const half *d_B, size_t
     kukri::_half_mm_v06_kernel<<<grid_size, block_size>>>(d_A, pitch_A / sizeof(kukri::half), d_B, pitch_B / sizeof(kukri::half), d_C, M, N, K, n_iter);
 
 }
-
+#define _BUF_A_LD (_BOX_V06 + 1)
+#define _BUF_B_LD (_K_LEN + 1)
 // Assume M, N ,K are all mutiples of _BOX_V06
 __global__ void kukri::_half_mm_v06_kernel(const half *d_A, int ld_A, const half *d_B, int ld_B, half *d_C, int M, int N, int K, int n_iter) {
-    __shared__ float buf_A[(_BOX_V06 + 1) * _BOX_V06];
-    __shared__ float buf_B[(_BOX_V06 + 1) * _BOX_V06];
+    __shared__ float buf_A[_BUF_A_LD * _K_LEN];
+    __shared__ float buf_B[_BUF_B_LD * _BOX_V06];
 
     int m_offset = _BOX_V06 * blockIdx.x;
     int n_offset = _BOX_V06 * blockIdx.y;
@@ -62,23 +66,27 @@ __global__ void kukri::_half_mm_v06_kernel(const half *d_A, int ld_A, const half
     for (int i_iter = 0; i_iter < n_iter; i_iter++) {
         // Loading the block into shared memory
 
-        int k_offset = _BOX_V06 * i_iter;
+        int k_offset = _K_LEN * i_iter;
 
 
         for (int i = 0; i < _N_LINE_Y_V06; i++) {
             int y = yf[i];
-            buf_A[IDX2C(x, y, _BOX_V06 + 1)] = __half2float(d_A[IDX2C(x + m_offset, y + k_offset, ld_A)]);
-            buf_B[IDX2C(x, y, _BOX_V06 + 1)] = __half2float(d_B[IDX2C(x + k_offset, y + n_offset, ld_B)]);
+            if (y < _K_LEN) {
+                buf_A[IDX2C(x, y, _BUF_A_LD)] = __half2float(d_A[IDX2C(x + m_offset, y + k_offset, ld_A)]);
+            }
+            if (x < _K_LEN) {
+                buf_B[IDX2C(x, y, _BUF_B_LD)] = __half2float(d_B[IDX2C(x + k_offset, y + n_offset, ld_B)]);
+            }
         }
 
         __syncthreads();
 
         
-        for (int k = 0; k < _BOX_V06; k++) {
-            float a = buf_A[IDX2C(x, k, _BOX_V06 + 1)];
+        for (int k = 0; k < _K_LEN; k++) {
+            float a = buf_A[IDX2C(x, k, _BUF_A_LD)];
             for (int i = 0; i < _N_LINE_Y_V06; i++) {
                 int y = yf[i];
-                float b = buf_B[IDX2C(k, y, _BOX_V06 + 1)];
+                float b = buf_B[IDX2C(k, y, _BUF_B_LD)];
                 val[i] += a * b;
             }
         }
