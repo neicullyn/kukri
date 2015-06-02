@@ -73,14 +73,17 @@ __global__ void kukri::_half_mm_v06_kernel(const half *d_A, int ld_A, const half
 
         __syncthreads();
 
+        float *a_base = &buf_A[IDX2C(x, 0, _BOX_V06 + 1)];
         
         for (int k = 0; k < _BOX_V06; k++) {
-            float a = buf_A[IDX2C(x, k, _BOX_V06 + 1)];
+            //float a = buf_A[IDX2C(x, k, _BOX_V06 + 1)];
+            float a = *a_base;
             for (int i = 0; i < _N_LINE_Y_V06; i++) {
                 int y = yf[i];
                 float b = buf_B[IDX2C(k, y, _BOX_V06 + 1)];
                 val[i] += a * b;
             }
+            a_base += IDX2C(x, 1, _BOX_V06 + 1);
         }
         __syncthreads();
     }
