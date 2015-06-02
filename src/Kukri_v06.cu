@@ -1,11 +1,11 @@
 #include "Kukri.cuh"
 
 using namespace kukri;
-#define _BOX_V06 128
-#define _BLOCK_SIZE_X_V06 128
-#define _BLOCK_SIZE_Y_V06 4
+#define _BOX_V06 32
+#define _BLOCK_SIZE_X_V06 32
+#define _BLOCK_SIZE_Y_V06 16
 
-#define _K_LEN 32
+#define _K_LEN 64
 
 #define _STRID_Y_V06 _BLOCK_SIZE_Y_V06
 #define _N_LINE_Y_V06 ((_BOX_V06 + _BLOCK_SIZE_Y_V06 - 1) / _BLOCK_SIZE_Y_V06)
@@ -22,14 +22,14 @@ void kukri::half_mm_v06(const half *d_A, size_t pitch_A, const half *d_B, size_t
     block_size.y = _BLOCK_SIZE_Y_V06;
     block_size.z = 1;
 
-    grid_size.x = (M + _BOX_V06 - 1) / _BOX_V06;
-    grid_size.y = (N + _BOX_V06 - 1) / _BOX_V06;
+    grid_size.x = M / _BOX_V06;
+    grid_size.y = N / _BOX_V06;
     grid_size.z = 1;
 
-    int n_iter = (K + _K_LEN - 1) / _K_LEN;
+    int n_iter = K / _K_LEN;
 
     //printf("%d %d %d\n", M, N, K);
-    if (!((M % _BOX_V06 == 0) && (N % _BOX_V06 == 0) && (K % _BOX_V06 == 0))) {
+    if (!((M % _BOX_V06 == 0) && (N % _BOX_V06 == 0) && (K % _K_LEN == 0))) {
         printf("Dimension error...\n");
         exit(-1);
     }

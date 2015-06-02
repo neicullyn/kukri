@@ -303,11 +303,12 @@ void kukri_mm_tex_test(kukri::half_mm_tex_func_t func, kukri::half *h_A, kukri::
     size_t pitch_A, pitch_B;
 
 
-#define _BOX_V06 128
+#define _BOX_V06 32
+#define _K_LEN 64
 
     int aM = (M + _BOX_V06 -1) / _BOX_V06 * _BOX_V06;
     int aN = (N + _BOX_V06 -1) / _BOX_V06 * _BOX_V06;
-    int aK = (K + _BOX_V06 -1) / _BOX_V06 * _BOX_V06;
+    int aK = (K + _K_LEN -1) / _K_LEN * _K_LEN;
 
     gpuErrChk(cudaMallocPitch(&d_A, &pitch_A, aM * sizeof(kukri::half), aK));
     gpuErrChk(cudaMallocPitch(&d_B, &pitch_B, aK * sizeof(kukri::half), aN));
