@@ -12,9 +12,6 @@ void kukri::half_mm_v05(const half *d_A, size_t pitch_A, const half *d_B, size_t
     dim3 grid_size;
     dim3 block_size;
 
-    // Each thread handles 1 element
-    // Each block handles 16x16 elements
-
     block_size.x = _BLOCK_SIZE_X_V05;
     block_size.y = _BLOCK_SIZE_Y_V05;
     block_size.z = 1;
@@ -63,9 +60,7 @@ __global__ void kukri::_half_mm_v05_kernel(const half *d_A, int ld_A, const half
         // Loading the block into shared memory
 
         int k_offset = _BOX_V05 * (n_iter - i_iter - 1);
-        int k_limit = MIN(K - k_offset, _BOX_V05);    
-
-
+        int k_limit = MIN(K - k_offset, _BOX_V05);  
 
         if (x < m_limit) {
             for (int y = threadIdx.y; y < k_limit; y += _STRID_Y_V05) {

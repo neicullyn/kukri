@@ -284,7 +284,7 @@ void kukri_mm_test(kukri::half_mm_func_t func, int size, char *test_name = NULL,
     delete[] h_Ch_naive;
 }
 
-void kukri_mm_tex_test(kukri::half_mm_tex_func_t func, kukri::half *h_A, kukri::half *h_B, kukri::half *h_C, int M, int N, int K, char *test_name = NULL) {
+void kukri_mm_test_v05(kukri::half_mm_tex_func_t func, kukri::half *h_A, kukri::half *h_B, kukri::half *h_C, int M, int N, int K, char *test_name = NULL) {
     printf("\n");
     if (test_name == NULL) {
         printf("---Kukri---\n");
@@ -303,12 +303,15 @@ void kukri_mm_tex_test(kukri::half_mm_tex_func_t func, kukri::half *h_A, kukri::
     size_t pitch_A, pitch_B;
 
 
-#define _BOX_V06 32
+#define _BOX_V05 64
 #define _K_LEN 64
 
-    int aM = (M + _BOX_V06 -1) / _BOX_V06 * _BOX_V06;
-    int aN = (N + _BOX_V06 -1) / _BOX_V06 * _BOX_V06;
+    int aM = (M + _BOX_V05 -1) / _BOX_V05 * _BOX_V05;
+    int aN = (N + _BOX_V05 -1) / _BOX_V05 * _BOX_V05;
     int aK = (K + _K_LEN -1) / _K_LEN * _K_LEN;
+
+#undef _BOX_V05
+#undef _K_LEN
 
     gpuErrChk(cudaMallocPitch(&d_A, &pitch_A, aM * sizeof(kukri::half), aK));
     gpuErrChk(cudaMallocPitch(&d_B, &pitch_B, aK * sizeof(kukri::half), aN));
@@ -352,7 +355,7 @@ void kukri_mm_tex_test(kukri::half_mm_tex_func_t func, kukri::half *h_A, kukri::
     gpuErrChk(cudaFree(d_C));
 }
 
-void kukri_mm_tex_test(kukri::half_mm_tex_func_t func, int size, char *test_name = NULL, bool en_test = false) {
+void kukri_mm_test_v05(kukri::half_mm_tex_func_t func, int size, char *test_name = NULL, bool en_test = false) {
 
     float *h_A = new float[size * size];
     float *h_B = new float[size * size];
@@ -379,7 +382,7 @@ void kukri_mm_tex_test(kukri::half_mm_tex_func_t func, int size, char *test_name
     kukri::array_float2half_host(h_Ch_naive, h_C_naive, size * size);
     kukri::array_half2float_host(h_C_naive, h_Ch_naive, size * size);
 
-    kukri_mm_tex_test(func, h_Ah, h_Bh, h_Ch, size, size, size, test_name);
+    kukri_mm_test_v05(func, h_Ah, h_Bh, h_Ch, size, size, size, test_name);
 
     kukri::array_half2float_host(h_C, h_Ch, size * size);
 
@@ -390,7 +393,143 @@ void kukri_mm_tex_test(kukri::half_mm_tex_func_t func, int size, char *test_name
         for (int j = 0; j < size; j++) {
             float diff = h_C[j * size + i] - h_C_naive[j * size + i];
             rcd_rerr.update(diff / h_C_naive[j * size + i]);
-            if (en_test && (fabs(diff) > 0.05 * fabs(h_C_naive[j * size + i]))) {
+            if (en_test && (fabs(diff) > 0.05 * fabs(h_C_naive[j * size + i])) 
+                        && fabs(diff) > 1e-4) {
+                printf("Test fails: i = %d, j = %d, C[i,j] = %f, C_blas[i,j] = %f\n",
+                    i, j, h_C[j * size + i], h_C_naive[j * size + i]);
+                flag = false;
+            }
+        }
+    }
+
+    if (en_test && flag) {
+        printf("Relative Error (Maximum) : %lf\n", rcd_rerr.get_max_abs());
+        printf("[Test Pass]\n");
+    }
+
+    delete[] h_A;
+    delete[] h_B;
+    delete[] h_C;
+    delete[] h_C_naive;
+
+    delete[] h_Ah;
+    delete[] h_Bh;
+    delete[] h_Ch;
+    delete[] h_Ch_naive;
+}
+
+void kukri_mm_test_v06(kukri::half_mm_tex_func_t func, kukri::half *h_A, kukri::half *h_B, kukri::half *h_C, int M, int N, int K, char *test_name = NULL) {
+    printf("\n");
+    if (test_name == NULL) {
+        printf("---Kukri---\n");
+    } else {
+        printf("---Kukri [%s]---\n", test_name);
+    }
+
+    printf("M = %d, N = %d, K = %d\n", M, N, K);
+    kukri::Timer h2d;
+    kukri::Timer mm;
+    kukri::Timer d2h;
+
+    printf("Initiating Kukri...\n");
+    kukri::half *d_A, *d_B;
+    kukri::half *d_C;
+    size_t pitch_A, pitch_B;
+
+
+#define _BOX_V06 64
+#define _K_LEN 64
+
+
+    int aM = (M + _BOX_V06 -1) / _BOX_V06 * _BOX_V06;
+    int aN = (N + _BOX_V06 -1) / _BOX_V06 * _BOX_V06;
+    int aK = (K + _K_LEN -1) / _K_LEN * _K_LEN;
+
+#undef _BOX_V06
+#undef _K_LEN
+
+    gpuErrChk(cudaMallocPitch(&d_A, &pitch_A, aM * sizeof(kukri::half), aK));
+    gpuErrChk(cudaMallocPitch(&d_B, &pitch_B, aK * sizeof(kukri::half), aN));
+
+    gpuErrChk(cudaMalloc(&d_C, aM * aN * sizeof(kukri::half)));
+
+    printf("h2d...");
+    h2d.tic();
+
+    gpuErrChk(cudaMemset2D(d_A, pitch_A, 0, aM * sizeof(kukri::half), aK));
+    gpuErrChk(cudaMemset2D(d_B, pitch_B, 0, aK * sizeof(kukri::half), aN));
+
+    gpuErrChk(cudaMemcpy2D(d_A, pitch_A, h_A, M * sizeof(kukri::half), M * sizeof(kukri::half), K, cudaMemcpyHostToDevice));
+    gpuErrChk(cudaMemcpy2D(d_B, pitch_B, h_B, K * sizeof(kukri::half), K * sizeof(kukri::half), N, cudaMemcpyHostToDevice));
+
+    //printf("%x  %x\n", d_A, d_B);
+
+    h2d.toc();
+    printf("%f ms\n", h2d.get_val());
+
+    printf("mm ...");
+    mm.tic();
+    float alpha = 1;
+    float beta = 0;
+    func(d_A, pitch_A, d_B, pitch_B, d_C, aM, aN, aK);
+    gpuErrChk(cudaGetLastError());
+    mm.toc();
+    printf("%f ms\n", mm.get_val());
+
+    printf("d2h...");
+    d2h.tic();
+    //gpuErrChk(cudaMemcpy(h_C, d_C, M * N * sizeof(kukri::half), cudaMemcpyDeviceToHost));
+    cudaMemcpy2D(h_C, M * sizeof(kukri::half), d_C, aM * sizeof(kukri::half), M * sizeof(kukri::half), N, cudaMemcpyDeviceToHost);
+    d2h.toc();
+    printf("%f ms\n", d2h.get_val());
+
+    printf("overall: %f ms\n", h2d.get_val() + mm.get_val() + d2h.get_val());
+
+    gpuErrChk(cudaFree(d_A));
+    gpuErrChk(cudaFree(d_B));
+    gpuErrChk(cudaFree(d_C));
+}
+
+void kukri_mm_test_v06(kukri::half_mm_tex_func_t func, int size, char *test_name = NULL, bool en_test = false) {
+
+    float *h_A = new float[size * size];
+    float *h_B = new float[size * size];
+    float *h_C_naive = new float[size * size];
+    float *h_C = new float[size * size];
+
+    kukri::half *h_Ah = new kukri::half[size * size];
+    kukri::half *h_Bh = new kukri::half[size * size];
+    kukri::half *h_Ch = new kukri::half[size * size];
+    kukri::half *h_Ch_naive = new kukri::half[size * size];
+
+    generate_normal(h_A, size * size, 0, 1);
+    generate_normal(h_B, size * size, 0, 1);
+
+    kukri::array_float2half_host(h_Ah, h_A, size * size);
+    kukri::array_float2half_host(h_Bh, h_B, size * size);
+
+    kukri::array_half2float_host(h_A, h_Ah, size * size);
+    kukri::array_half2float_host(h_B, h_Bh, size * size);
+
+    //naive_mm(h_A, h_B, h_C_naive, size, size, size);
+    blas_mm_test(h_A, h_B, h_C_naive, size, size, size, true);
+
+    kukri::array_float2half_host(h_Ch_naive, h_C_naive, size * size);
+    kukri::array_half2float_host(h_C_naive, h_Ch_naive, size * size);
+
+    kukri_mm_test_v06(func, h_Ah, h_Bh, h_Ch, size, size, size, test_name);
+
+    kukri::array_half2float_host(h_C, h_Ch, size * size);
+
+    kukri::Recorder rcd_rerr;
+
+    bool flag = true;
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            float diff = h_C[j * size + i] - h_C_naive[j * size + i];
+            rcd_rerr.update(diff / h_C_naive[j * size + i]);
+            if (en_test && (fabs(diff) > 0.05 * fabs(h_C_naive[j * size + i])
+                        && fabs(diff) > 1e-4)) {
                 printf("Test fails: i = %d, j = %d, C[i,j] = %f, C_blas[i,j] = %f\n",
                     i, j, h_C[j * size + i], h_C_naive[j * size + i]);
                 flag = false;
@@ -495,7 +634,7 @@ int main(int argc, char *argv[]) {
 
 
     //kukri_float2half2float_test(n_rows_A, n_cols_A);
-    int single_test_size = 2000;
+    int single_test_size = 2048;
 
     kukri::Timer tmr;
 
@@ -506,12 +645,7 @@ int main(int argc, char *argv[]) {
     kukri_mm_test(kukri::half_mm_v02, single_test_size, "Shared Memory", test);
     kukri_mm_test(kukri::half_mm_v03, single_test_size, "Improved Shared Memory", test);
     kukri_mm_test(kukri::half_mm_v04, single_test_size, "Coalasced", test);
-    //kukri_mm_tex_test(kukri::half_mm_v05, single_test_size, "Less Branch", test);
-    kukri_mm_tex_test(kukri::half_mm_v06, single_test_size, "No Branch", test);
-
-    //mm_test(n_rows_A, n_cols_A, n_rows_B, n_cols_B);
-
-
-
+    kukri_mm_test_v05(kukri::half_mm_v05, single_test_size, "Less Branch", test);
+    kukri_mm_test_v06(kukri::half_mm_v06, single_test_size, "No Branch", test);
 
 }

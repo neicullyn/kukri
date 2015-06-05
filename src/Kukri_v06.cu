@@ -1,9 +1,9 @@
 #include "Kukri.cuh"
 
 using namespace kukri;
-#define _BOX_V06 32
-#define _BLOCK_SIZE_X_V06 32
-#define _BLOCK_SIZE_Y_V06 16
+#define _BOX_V06 64
+#define _BLOCK_SIZE_X_V06 64
+#define _BLOCK_SIZE_Y_V06 8
 
 #define _K_LEN 64
 
@@ -14,9 +14,6 @@ using namespace kukri;
 void kukri::half_mm_v06(const half *d_A, size_t pitch_A, const half *d_B, size_t pitch_B, half *d_C, int M, int N, int K) {
     dim3 grid_size;
     dim3 block_size;
-
-    // Each thread handles 1 element
-    // Each block handles 16x16 elements
 
     block_size.x = _BLOCK_SIZE_X_V06;
     block_size.y = _BLOCK_SIZE_Y_V06;
@@ -30,6 +27,7 @@ void kukri::half_mm_v06(const half *d_A, size_t pitch_A, const half *d_B, size_t
 
     //printf("%d %d %d\n", M, N, K);
     if (!((M % _BOX_V06 == 0) && (N % _BOX_V06 == 0) && (K % _K_LEN == 0))) {
+        printf("%d %d %d\n", M, N, K);
         printf("Dimension error...\n");
         exit(-1);
     }
